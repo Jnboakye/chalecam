@@ -45,7 +45,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 24, color }}>🏠</Text>
+            <Text className="text-2xl" style={{ color }}>🏠</Text>
           ),
         }}
       />
@@ -55,7 +55,7 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Join',
           tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 24, color }}>➕</Text>
+            <Text className="text-2xl" style={{ color }}>➕</Text>
           ),
         }}
       />
@@ -115,7 +115,7 @@ function RootNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#6200EA" />
       </View>
     );

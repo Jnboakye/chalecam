@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   Alert,
   ActivityIndicator,
@@ -99,67 +98,73 @@ const CreateEventScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Create New Event</Text>
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 20 }}>
+      <Text className="text-3xl font-bold text-primary mb-6">Create New Event</Text>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Event Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g., Birthday Party"
-          value={eventName}
-          onChangeText={setEventName}
-          autoCapitalize="words"
-        />
-
-        <Text style={styles.label}>Start Date & Time</Text>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setShowStartPicker(true)}
-        >
-          <Text style={styles.dateText}>{formatDateTime(startDate)}</Text>
-        </TouchableOpacity>
-        {showStartPicker && (
-          <DateTimePicker
-            value={startDate}
-            mode="datetime"
-            is24Hour={false}
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowStartPicker(Platform.OS === 'ios');
-              if (selectedDate) {
-                setStartDate(selectedDate);
-              }
-            }}
+      <View className="gap-5">
+        <View>
+          <Text className="text-base font-semibold text-gray-800 mb-2">Event Name</Text>
+          <TextInput
+            className="bg-gray-100 rounded-lg p-4 text-base border border-gray-200"
+            placeholder="e.g., Birthday Party"
+            value={eventName}
+            onChangeText={setEventName}
+            autoCapitalize="words"
           />
-        )}
+        </View>
 
-        <Text style={styles.label}>End Date & Time</Text>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setShowEndPicker(true)}
-        >
-          <Text style={styles.dateText}>{formatDateTime(endDate)}</Text>
-        </TouchableOpacity>
-        {showEndPicker && (
-          <DateTimePicker
-            value={endDate}
-            mode="datetime"
-            is24Hour={false}
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowEndPicker(Platform.OS === 'ios');
-              if (selectedDate) {
-                setEndDate(selectedDate);
-              }
-            }}
-          />
-        )}
+        <View>
+          <Text className="text-base font-semibold text-gray-800 mb-2">Start Date & Time</Text>
+          <TouchableOpacity
+            className="bg-gray-100 rounded-lg p-4 border border-gray-200"
+            onPress={() => setShowStartPicker(true)}
+          >
+            <Text className="text-base text-gray-800">{formatDateTime(startDate)}</Text>
+          </TouchableOpacity>
+          {showStartPicker && (
+            <DateTimePicker
+              value={startDate}
+              mode="datetime"
+              is24Hour={false}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowStartPicker(Platform.OS === 'ios');
+                if (selectedDate) {
+                  setStartDate(selectedDate);
+                }
+              }}
+            />
+          )}
+        </View>
 
-        <View style={styles.switchRow}>
-          <View style={styles.switchLabelContainer}>
-            <Text style={styles.label}>Require approval for participants</Text>
-            <Text style={styles.switchDescription}>
+        <View>
+          <Text className="text-base font-semibold text-gray-800 mb-2">End Date & Time</Text>
+          <TouchableOpacity
+            className="bg-gray-100 rounded-lg p-4 border border-gray-200"
+            onPress={() => setShowEndPicker(true)}
+          >
+            <Text className="text-base text-gray-800">{formatDateTime(endDate)}</Text>
+          </TouchableOpacity>
+          {showEndPicker && (
+            <DateTimePicker
+              value={endDate}
+              mode="datetime"
+              is24Hour={false}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowEndPicker(Platform.OS === 'ios');
+                if (selectedDate) {
+                  setEndDate(selectedDate);
+                }
+              }}
+            />
+          )}
+        </View>
+
+        <View className="flex-row justify-between items-center py-2">
+          <View className="flex-1 mr-4">
+            <Text className="text-base font-semibold text-gray-800">Require approval for participants</Text>
+            <Text className="text-xs text-gray-600 mt-1">
               Participants must be approved before joining
             </Text>
           </View>
@@ -171,10 +176,10 @@ const CreateEventScreen = ({ navigation }) => {
           />
         </View>
 
-        <View style={styles.switchRow}>
-          <View style={styles.switchLabelContainer}>
-            <Text style={styles.label}>Show photos in real-time</Text>
-            <Text style={styles.switchDescription}>
+        <View className="flex-row justify-between items-center py-2">
+          <View className="flex-1 mr-4">
+            <Text className="text-base font-semibold text-gray-800">Show photos in real-time</Text>
+            <Text className="text-xs text-gray-600 mt-1">
               Photos appear immediately or after event ends
             </Text>
           </View>
@@ -186,107 +191,33 @@ const CreateEventScreen = ({ navigation }) => {
           />
         </View>
 
-        <Text style={styles.label}>Max camera roll uploads per person</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="10"
-          value={maxCameraRollUploads}
-          onChangeText={setMaxCameraRollUploads}
-          keyboardType="numeric"
-        />
-        <Text style={styles.hint}>Unlimited in-app camera photos allowed</Text>
+        <View>
+          <Text className="text-base font-semibold text-gray-800 mb-2">Max camera roll uploads per person</Text>
+          <TextInput
+            className="bg-gray-100 rounded-lg p-4 text-base border border-gray-200"
+            placeholder="10"
+            value={maxCameraRollUploads}
+            onChangeText={setMaxCameraRollUploads}
+            keyboardType="numeric"
+          />
+          <Text className="text-xs text-gray-500 -mt-3">Unlimited in-app camera photos allowed</Text>
+        </View>
 
         <TouchableOpacity
-          style={styles.createButton}
+          className="bg-primary rounded-lg p-4 items-center mt-2"
           onPress={handleCreateEvent}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.createButtonText}>Create Event</Text>
+            <Text className="text-white text-base font-semibold">Create Event</Text>
           )}
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#6200EA',
-    marginBottom: 24,
-  },
-  form: {
-    gap: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  dateButton: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  dateText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  switchLabelContainer: {
-    flex: 1,
-    marginRight: 16,
-  },
-  switchDescription: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  hint: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: -12,
-  },
-  createButton: {
-    backgroundColor: '#6200EA',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
 
 export default CreateEventScreen;
 

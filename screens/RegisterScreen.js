@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -42,15 +41,15 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      className="flex-1 bg-white"
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join Chalecam to start sharing</Text>
+      <View className="flex-1 justify-center p-5">
+        <Text className="text-3xl font-bold text-primary text-center mb-2">Create Account</Text>
+        <Text className="text-base text-gray-600 text-center mb-10">Join Chalecam to start sharing</Text>
 
-        <View style={styles.form}>
+        <View className="w-full">
           <TextInput
-            style={styles.input}
+            className="bg-gray-100 rounded-lg p-4 mb-4 text-base border border-gray-200"
             placeholder="Full Name"
             value={name}
             onChangeText={setName}
@@ -58,7 +57,7 @@ const RegisterScreen = ({ navigation }) => {
           />
 
           <TextInput
-            style={styles.input}
+            className="bg-gray-100 rounded-lg p-4 mb-4 text-base border border-gray-200"
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
@@ -68,7 +67,7 @@ const RegisterScreen = ({ navigation }) => {
           />
 
           <TextInput
-            style={styles.input}
+            className="bg-gray-100 rounded-lg p-4 mb-4 text-base border border-gray-200"
             placeholder="Password (min 6 characters)"
             value={password}
             onChangeText={setPassword}
@@ -77,23 +76,23 @@ const RegisterScreen = ({ navigation }) => {
           />
 
           <TouchableOpacity
-            style={styles.button}
+            className="bg-primary rounded-lg p-4 items-center mt-2"
             onPress={handleRegister}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Create Account</Text>
+              <Text className="text-white text-base font-semibold">Create Account</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
-            style={styles.linkContainer}
+            className="mt-5 items-center"
           >
-            <Text style={styles.linkText}>
-              Already have an account? <Text style={styles.linkBold}>Sign In</Text>
+            <Text className="text-gray-600 text-sm">
+              Already have an account? <Text className="text-primary font-semibold">Sign In</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -101,67 +100,6 @@ const RegisterScreen = ({ navigation }) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#6200EA',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  form: {
-    width: '100%',
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  button: {
-    backgroundColor: '#6200EA',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  linkContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  linkBold: {
-    color: '#6200EA',
-    fontWeight: '600',
-  },
-});
 
 export default RegisterScreen;
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   TextInput,
   Alert,
@@ -141,80 +140,80 @@ const JoinEventScreen = ({ navigation }) => {
   if (showScanner) {
     if (!permission) {
       return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-white p-5 justify-center">
           <Text>Requesting camera permission...</Text>
         </View>
       );
     }
     if (!permission.granted) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.errorText}>Camera permission denied</Text>
+        <View className="flex-1 bg-white p-5 justify-center">
+          <Text className="text-red-500 text-base text-center mb-5">Camera permission denied</Text>
           <TouchableOpacity
-            style={styles.button}
+            className="bg-primary rounded-lg p-4 items-center"
             onPress={requestPermission}
           >
-            <Text style={styles.buttonText}>Request Permission</Text>
+            <Text className="text-white text-base font-semibold">Request Permission</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, { marginTop: 12, backgroundColor: '#666' }]}
+            className="bg-gray-600 rounded-lg p-4 items-center mt-3"
             onPress={() => setShowScanner(false)}
           >
-            <Text style={styles.buttonText}>Go Back</Text>
+            <Text className="text-white text-base font-semibold">Go Back</Text>
           </TouchableOpacity>
         </View>
       );
     }
 
     return (
-      <View style={styles.scannerContainer}>
+      <View className="flex-1 bg-black">
         <CameraView
-          style={StyleSheet.absoluteFillObject}
+          className="absolute inset-0"
           onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           barcodeScannerSettings={{
             barcodeTypes: ['qr'],
           }}
         />
-        <View style={styles.scannerOverlay}>
-          <View style={styles.scannerFrame} />
-          <Text style={styles.scannerText}>Scan QR Code</Text>
+        <View className="flex-1 justify-center items-center">
+          <View className="w-64 h-64 border-2 border-primary rounded-xl" />
+          <Text className="text-white text-lg mt-5 font-semibold">Scan QR Code</Text>
         </View>
         <TouchableOpacity
-          style={styles.closeButton}
+          className="absolute bottom-10 self-center bg-primary px-8 py-3 rounded-lg"
           onPress={() => {
             setShowScanner(false);
             setScanned(false);
           }}
         >
-          <Text style={styles.closeButtonText}>Close</Text>
+          <Text className="text-white text-base font-semibold">Close</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Join an Event</Text>
-      <Text style={styles.subtitle}>Scan a QR code or enter an event code</Text>
+    <View className="flex-1 bg-white p-5 justify-center">
+      <Text className="text-3xl font-bold text-primary text-center mb-2">Join an Event</Text>
+      <Text className="text-base text-gray-600 text-center mb-10">Scan a QR code or enter an event code</Text>
 
-      <View style={styles.optionsContainer}>
+      <View className="w-full">
         <TouchableOpacity
-          style={styles.optionButton}
+          className="bg-primary rounded-lg p-4 items-center mb-6"
           onPress={() => setShowScanner(true)}
           disabled={loading}
         >
-          <Text style={styles.optionButtonText}>📷 Scan QR Code</Text>
+          <Text className="text-white text-lg font-semibold">📷 Scan QR Code</Text>
         </TouchableOpacity>
 
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>OR</Text>
-          <View style={styles.dividerLine} />
+        <View className="flex-row items-center my-6">
+          <View className="flex-1 h-px bg-gray-200" />
+          <Text className="mx-4 text-gray-500 text-sm">OR</Text>
+          <View className="flex-1 h-px bg-gray-200" />
         </View>
 
-        <Text style={styles.label}>Enter 6-Digit Event Code</Text>
+        <Text className="text-base font-semibold text-gray-800 mb-2">Enter 6-Digit Event Code</Text>
         <TextInput
-          style={styles.input}
+          className="bg-gray-100 rounded-lg p-4 text-lg text-center tracking-widest mb-4 border border-gray-200"
           placeholder="000000"
           value={eventCode}
           onChangeText={setEventCode}
@@ -224,145 +223,20 @@ const JoinEventScreen = ({ navigation }) => {
         />
 
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          className={`bg-primary rounded-lg p-4 items-center ${loading ? 'opacity-60' : ''}`}
           onPress={handleJoinByCode}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Join Event</Text>
+            <Text className="text-white text-base font-semibold">Join Event</Text>
           )}
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#6200EA',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  optionsContainer: {
-    width: '100%',
-  },
-  optionButton: {
-    backgroundColor: '#6200EA',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  optionButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#999',
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 18,
-    textAlign: 'center',
-    letterSpacing: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  button: {
-    backgroundColor: '#6200EA',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  scannerContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  scannerOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scannerFrame: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: '#6200EA',
-    borderRadius: 12,
-  },
-  scannerText: {
-    color: '#fff',
-    fontSize: 18,
-    marginTop: 20,
-    fontWeight: '600',
-  },
-  closeButton: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
-    backgroundColor: '#6200EA',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorText: {
-    color: '#f44336',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-});
 
 export default JoinEventScreen;
 

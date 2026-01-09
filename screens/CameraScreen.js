@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
@@ -112,7 +111,7 @@ const CameraScreen = ({ route, navigation }) => {
 
   if (!permission) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 bg-black">
         <Text>Requesting camera permission...</Text>
       </View>
     );
@@ -120,19 +119,19 @@ const CameraScreen = ({ route, navigation }) => {
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Camera permission denied</Text>
+      <View className="flex-1 bg-black justify-center items-center p-5">
+        <Text className="text-red-500 text-base text-center mb-5">Camera permission denied</Text>
         <TouchableOpacity
-          style={styles.button}
+          className="bg-primary px-8 py-3 rounded-lg self-center mt-5"
           onPress={requestPermission}
         >
-          <Text style={styles.buttonText}>Request Permission</Text>
+          <Text className="text-white text-base font-semibold">Request Permission</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, { marginTop: 12, backgroundColor: '#666' }]}
+          className="bg-gray-600 px-8 py-3 rounded-lg self-center mt-3"
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.buttonText}>Go Back</Text>
+          <Text className="text-white text-base font-semibold">Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -140,25 +139,25 @@ const CameraScreen = ({ route, navigation }) => {
 
   if (capturedPhoto) {
     return (
-      <View style={styles.container}>
-        <Image source={{ uri: capturedPhoto }} style={styles.preview} />
-        <View style={styles.controls}>
+      <View className="flex-1 bg-black">
+        <Image source={{ uri: capturedPhoto }} className="flex-1 w-full" />
+        <View className="flex-row justify-around p-5 bg-black">
           <TouchableOpacity
-            style={[styles.controlButton, styles.retakeButton]}
+            className="bg-gray-600 px-8 py-3 rounded-lg min-w-[120px] items-center"
             onPress={handleRetake}
             disabled={uploading}
           >
-            <Text style={styles.controlButtonText}>Retake</Text>
+            <Text className="text-white text-base font-semibold">Retake</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.controlButton, styles.uploadButton]}
+            className="bg-primary px-8 py-3 rounded-lg min-w-[120px] items-center"
             onPress={handleUpload}
             disabled={uploading}
           >
             {uploading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.controlButtonText}>Upload</Text>
+              <Text className="text-white text-base font-semibold">Upload</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -167,116 +166,26 @@ const CameraScreen = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        <View style={styles.overlay}>
+    <View className="flex-1 bg-black">
+      <CameraView className="flex-1" facing={facing} ref={cameraRef}>
+        <View className="flex-1 bg-transparent justify-end items-center pb-10">
           <TouchableOpacity
-            style={styles.flipButton}
+            className="absolute top-10 right-5 p-3 bg-black/50 rounded-full"
             onPress={handleFlipCamera}
           >
-            <Text style={styles.flipButtonText}>🔄</Text>
+            <Text className="text-2xl">🔄</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.captureButton}
+            className="w-[70px] h-[70px] rounded-full bg-white justify-center items-center border-4 border-primary"
             onPress={handleCapture}
           >
-            <View style={styles.captureButtonInner} />
+            <View className="w-[50px] h-[50px] rounded-full bg-primary" />
           </TouchableOpacity>
         </View>
       </CameraView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 40,
-  },
-  flipButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    padding: 12,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 24,
-  },
-  flipButtonText: {
-    fontSize: 24,
-  },
-  captureButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#6200EA',
-  },
-  captureButtonInner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#6200EA',
-  },
-  preview: {
-    flex: 1,
-    width: '100%',
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 20,
-    backgroundColor: '#000',
-  },
-  controlButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    minWidth: 120,
-    alignItems: 'center',
-  },
-  retakeButton: {
-    backgroundColor: '#666',
-  },
-  uploadButton: {
-    backgroundColor: '#6200EA',
-  },
-  controlButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  button: {
-    backgroundColor: '#6200EA',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignSelf: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorText: {
-    color: '#f44336',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-});
 
 export default CameraScreen;
 

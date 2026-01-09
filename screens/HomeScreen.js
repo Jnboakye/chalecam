@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
@@ -79,8 +78,8 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>
+    <View className="flex-1 justify-center items-center pt-24">
+      <Text className="text-base text-gray-500 text-center">
         {activeTab === 'myEvents'
           ? "You haven't created any events yet"
           : "You haven't joined any events yet"}
@@ -91,28 +90,28 @@ const HomeScreen = ({ navigation }) => {
   const currentEvents = activeTab === 'myEvents' ? myEvents : joinedEvents;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.tabContainer}>
+    <View className="flex-1 bg-white">
+      <View className="flex-row border-b border-gray-200 bg-white">
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'myEvents' && styles.activeTab]}
+          className={`flex-1 py-4 items-center ${activeTab === 'myEvents' ? 'border-b-2 border-primary' : ''}`}
           onPress={() => setActiveTab('myEvents')}
         >
-          <Text style={[styles.tabText, activeTab === 'myEvents' && styles.activeTabText]}>
+          <Text className={`text-base ${activeTab === 'myEvents' ? 'text-primary font-semibold' : 'text-gray-600 font-medium'}`}>
             My Events
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'joinedEvents' && styles.activeTab]}
+          className={`flex-1 py-4 items-center ${activeTab === 'joinedEvents' ? 'border-b-2 border-primary' : ''}`}
           onPress={() => setActiveTab('joinedEvents')}
         >
-          <Text style={[styles.tabText, activeTab === 'joinedEvents' && styles.activeTabText]}>
+          <Text className={`text-base ${activeTab === 'joinedEvents' ? 'text-primary font-semibold' : 'text-gray-600 font-medium'}`}>
             Joined Events
           </Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#6200EA" />
         </View>
       ) : (
@@ -120,7 +119,7 @@ const HomeScreen = ({ navigation }) => {
           data={currentEvents}
           renderItem={renderEvent}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl
@@ -134,87 +133,15 @@ const HomeScreen = ({ navigation }) => {
 
       {activeTab === 'myEvents' && (
         <TouchableOpacity
-          style={styles.fab}
+          className="absolute right-5 bottom-5 w-14 h-14 rounded-full bg-primary justify-center items-center shadow-lg"
           onPress={() => navigation.navigate('CreateEvent')}
         >
-          <Text style={styles.fabText}>+</Text>
+          <Text className="text-3xl text-white font-light">+</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#6200EA',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#6200EA',
-    fontWeight: '600',
-  },
-  listContent: {
-    padding: 16,
-    flexGrow: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 100,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-    textAlign: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#6200EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  fabText: {
-    fontSize: 32,
-    color: '#fff',
-    fontWeight: '300',
-  },
-});
 
 export default HomeScreen;
 

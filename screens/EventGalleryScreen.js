@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   Image,
@@ -205,16 +204,17 @@ const EventGalleryScreen = ({ route, navigation }) => {
 
   const renderPhoto = ({ item }) => (
     <TouchableOpacity
-      style={styles.photoContainer}
+      className="m-1 rounded-lg overflow-hidden"
+      style={{ width: IMAGE_SIZE, height: IMAGE_SIZE }}
       onPress={() => navigation.navigate('PhotoDetail', { photo: item, photos })}
     >
-      <Image source={{ uri: item.downloadUrl }} style={styles.photo} />
+      <Image source={{ uri: item.downloadUrl }} className="w-full h-full" style={{ resizeMode: 'cover' }} />
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#6200EA" />
       </View>
     );
@@ -223,11 +223,11 @@ const EventGalleryScreen = ({ route, navigation }) => {
   const canViewPhotos = event?.showPhotosRealtime || new Date() > (event?.endTime?.toDate ? event.endTime.toDate() : new Date(event?.endTime));
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.photoCount}>{photos.length} photos</Text>
+    <View className="flex-1 bg-gray-100">
+      <View className="bg-white p-4 border-b border-gray-200">
+        <Text className="text-lg font-semibold text-gray-800">{photos.length} photos</Text>
         {!canViewPhotos && (
-          <Text style={styles.hintText}>Photos will appear after the event ends</Text>
+          <Text className="text-xs text-gray-600 mt-1">Photos will appear after the event ends</Text>
         )}
       </View>
 
@@ -237,141 +237,46 @@ const EventGalleryScreen = ({ route, navigation }) => {
           renderItem={renderPhoto}
           keyExtractor={(item) => item.id}
           numColumns={3}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ padding: 8, flexGrow: 1 }}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No photos yet</Text>
+            <View className="flex-1 justify-center items-center pt-24">
+              <Text className="text-base text-gray-500">No photos yet</Text>
             </View>
           }
         />
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Photos will appear after the event ends</Text>
+        <View className="flex-1 justify-center items-center pt-24">
+          <Text className="text-base text-gray-500">Photos will appear after the event ends</Text>
         </View>
       )}
 
       {/* FAB Buttons */}
-      <View style={styles.fabContainer}>
+      <View className="absolute right-5 bottom-5 gap-3">
         <TouchableOpacity
-          style={[styles.fab, styles.fabSecondary]}
+          className="w-14 h-14 rounded-full bg-white border-2 border-primary justify-center items-center shadow-lg"
           onPress={handleUploadFromGallery}
           disabled={uploading}
         >
-          <Text style={styles.fabText}>📷</Text>
+          <Text className="text-2xl">📷</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.fab}
+          className="w-14 h-14 rounded-full bg-primary justify-center items-center shadow-lg"
           onPress={handleTakePhoto}
           disabled={uploading}
         >
-          <Text style={styles.fabText}>📸</Text>
+          <Text className="text-2xl">📸</Text>
         </TouchableOpacity>
       </View>
 
       {uploading && (
-        <View style={styles.uploadingOverlay}>
+        <View className="absolute inset-0 bg-black/50 justify-center items-center">
           <ActivityIndicator size="large" color="#6200EA" />
-          <Text style={styles.uploadingText}>Uploading...</Text>
+          <Text className="text-white mt-3 text-base">Uploading...</Text>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  photoCount: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  listContent: {
-    padding: 8,
-  },
-  photoContainer: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    margin: 4,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 100,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  fabContainer: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    gap: 12,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#6200EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  fabSecondary: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#6200EA',
-  },
-  fabText: {
-    fontSize: 24,
-  },
-  uploadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  uploadingText: {
-    color: '#fff',
-    marginTop: 12,
-    fontSize: 16,
-  },
-});
 
 export default EventGalleryScreen;
 

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   Dimensions,
   ScrollView,
@@ -45,119 +44,54 @@ const PhotoDetailScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-black">
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
         <Image
           source={{ uri: currentPhoto.downloadUrl }}
-          style={styles.image}
+          className="w-full"
+          style={{ width, height: height * 0.7 }}
           resizeMode="contain"
         />
-        <View style={styles.infoContainer}>
-          <Text style={styles.uploaderName}>
+        <View className="bg-white p-4 mt-2">
+          <Text className="text-lg font-semibold text-gray-800 mb-1">
             📸 {currentPhoto.userName || 'Unknown'}
           </Text>
-          <Text style={styles.uploadDate}>
+          <Text className="text-sm text-gray-600 mb-1">
             {formatUploadDate(currentPhoto.uploadedAt)}
           </Text>
-          <Text style={styles.source}>
+          <Text className="text-xs text-gray-500">
             Source: {currentPhoto.source === 'camera' ? 'Camera' : 'Camera Roll'}
           </Text>
         </View>
       </ScrollView>
 
       {photos.length > 1 && (
-        <View style={styles.navigationContainer}>
+        <View className="flex-row justify-between items-center p-4 bg-white border-t border-gray-200">
           <TouchableOpacity
-            style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
+            className={`px-4 py-2 rounded-lg ${currentIndex === 0 ? 'bg-gray-300 opacity-50' : 'bg-primary'}`}
             onPress={handlePrevious}
             disabled={currentIndex === 0}
           >
-            <Text style={styles.navButtonText}>← Previous</Text>
+            <Text className="text-white text-sm font-semibold">← Previous</Text>
           </TouchableOpacity>
-          <Text style={styles.counter}>
+          <Text className="text-sm text-gray-600 font-medium">
             {currentIndex + 1} / {photos.length}
           </Text>
           <TouchableOpacity
-            style={[
-              styles.navButton,
-              currentIndex === photos.length - 1 && styles.navButtonDisabled,
-            ]}
+            className={`px-4 py-2 rounded-lg ${currentIndex === photos.length - 1 ? 'bg-gray-300 opacity-50' : 'bg-primary'}`}
             onPress={handleNext}
             disabled={currentIndex === photos.length - 1}
           >
-            <Text style={styles.navButtonText}>Next →</Text>
+            <Text className="text-white text-sm font-semibold">Next →</Text>
           </TouchableOpacity>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  image: {
-    width: width,
-    height: height * 0.7,
-  },
-  infoContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginTop: 8,
-  },
-  uploaderName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  uploadDate: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  source: {
-    fontSize: 12,
-    color: '#999',
-  },
-  navigationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  navButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#6200EA',
-    borderRadius: 8,
-  },
-  navButtonDisabled: {
-    backgroundColor: '#ccc',
-    opacity: 0.5,
-  },
-  navButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  counter: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-});
 
 export default PhotoDetailScreen;
 
