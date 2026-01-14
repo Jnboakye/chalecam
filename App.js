@@ -113,7 +113,11 @@ function MainStack() {
 function RootNavigator() {
   const { user, loading } = useAuth();
 
-  if (loading) {
+  // TODO: Remove this bypass when auth is ready
+  // Temporarily bypass auth to see screens
+  const BYPASS_AUTH = true;
+
+  if (loading && !BYPASS_AUTH) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#6200EA" />
@@ -123,7 +127,7 @@ function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {user ? <MainStack /> : <AuthStack />}
+      {BYPASS_AUTH ? <MainStack /> : (user ? <MainStack /> : <AuthStack />)}
     </NavigationContainer>
   );
 }

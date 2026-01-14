@@ -12,5 +12,6 @@ web-build/
 dist/
 .env
 .env.local
+.env.example
 firebase-config.js
 

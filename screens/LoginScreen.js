@@ -48,6 +48,7 @@ const LoginScreen = ({ navigation }) => {
         <View className="w-full">
           <TextInput
             className="bg-gray-100 rounded-lg p-4 mb-4 text-base border border-gray-200"
+            style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 16, marginBottom: 16, fontSize: 16, borderWidth: 1, borderColor: '#e0e0e0' }}
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
@@ -58,6 +59,7 @@ const LoginScreen = ({ navigation }) => {
 
           <TextInput
             className="bg-gray-100 rounded-lg p-4 mb-4 text-base border border-gray-200"
+            style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 16, marginBottom: 16, fontSize: 16, borderWidth: 1, borderColor: '#e0e0e0' }}
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
@@ -67,22 +69,24 @@ const LoginScreen = ({ navigation }) => {
 
           <TouchableOpacity
             className="bg-primary rounded-lg p-4 items-center mb-3"
+            style={{ backgroundColor: '#6200EA', borderRadius: 8, padding: 16, alignItems: 'center', marginBottom: 12 }}
             onPress={handleLogin}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-white text-base font-semibold">Sign In</Text>
+              <Text className="text-white text-base font-semibold" style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Sign In</Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
             className="bg-white rounded-lg p-4 items-center mb-3 border border-primary"
+            style={{ backgroundColor: '#fff', borderRadius: 8, padding: 16, alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#6200EA' }}
             onPress={handleGoogleSignIn}
             disabled={loading}
           >
-            <Text className="text-primary text-base font-semibold">Sign in with Google</Text>
+            <Text className="text-primary text-base font-semibold" style={{ color: '#6200EA', fontSize: 16, fontWeight: '600' }}>Sign in with Google</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

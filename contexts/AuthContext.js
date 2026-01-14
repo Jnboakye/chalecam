@@ -36,6 +36,12 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Fetch user document from Firestore
@@ -55,6 +61,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) return;
+
     if (response?.type === 'success') {
       const { id_token } = response.params;
       const credential = GoogleAuthProvider.credential(id_token);
@@ -79,6 +88,10 @@ export const AuthProvider = ({ children }) => {
   }, [response]);
 
   const login = async (email, password) => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) {
+      return { success: false, error: 'Authentication is not configured yet' };
+    }
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       return { success: true, user: result.user };
@@ -88,6 +101,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) {
+      return { success: false, error: 'Authentication is not configured yet' };
+    }
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       const user = result.user;
@@ -113,10 +130,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signInWithGoogle = () => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) {
+      console.warn('Google sign-in not available: auth not configured');
+      return;
+    }
     promptAsync();
   };
 
   const logout = async () => {
+    // TODO: Re-enable when auth is set up
+    if (!auth) {
+      return { success: false, error: 'Authentication is not configured yet' };
+    }
     try {
       await signOut(auth);
       return { success: true };
