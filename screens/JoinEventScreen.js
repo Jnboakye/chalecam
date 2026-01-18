@@ -140,81 +140,82 @@ const JoinEventScreen = ({ navigation }) => {
   if (showScanner) {
     if (!permission) {
       return (
-        <View className="flex-1 bg-white p-5 justify-center">
-          <Text>Requesting camera permission...</Text>
+        <View style={{ flex: 1, backgroundColor: '#1a1a1a', padding: 20, justifyContent: 'center' }}>
+          <Text style={{ color: '#fff', textAlign: 'center' }}>Requesting camera permission...</Text>
         </View>
       );
     }
     if (!permission.granted) {
       return (
-        <View className="flex-1 bg-white p-5 justify-center">
-          <Text className="text-red-500 text-base text-center mb-5">Camera permission denied</Text>
+        <View style={{ flex: 1, backgroundColor: '#1a1a1a', padding: 20, justifyContent: 'center' }}>
+          <Text style={{ color: '#ff4444', fontSize: 16, textAlign: 'center', marginBottom: 20 }}>Camera permission denied</Text>
           <TouchableOpacity
-            className="bg-primary rounded-lg p-4 items-center"
+            style={{ backgroundColor: '#9b59b6', borderRadius: 12, padding: 16, alignItems: 'center' }}
             onPress={requestPermission}
           >
-            <Text className="text-white text-base font-semibold">Request Permission</Text>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Request Permission</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="bg-gray-600 rounded-lg p-4 items-center mt-3"
+            style={{ backgroundColor: '#666', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 12 }}
             onPress={() => setShowScanner(false)}
           >
-            <Text className="text-white text-base font-semibold">Go Back</Text>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Go Back</Text>
           </TouchableOpacity>
         </View>
       );
     }
 
     return (
-      <View className="flex-1 bg-black">
+      <View style={{ flex: 1, backgroundColor: '#000' }}>
         <CameraView
-          className="absolute inset-0"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
           barcodeScannerSettings={{
             barcodeTypes: ['qr'],
           }}
         />
-        <View className="flex-1 justify-center items-center">
-          <View className="w-64 h-64 border-2 border-primary rounded-xl" />
-          <Text className="text-white text-lg mt-5 font-semibold">Scan QR Code</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: 256, height: 256, borderWidth: 2, borderColor: '#9b59b6', borderRadius: 16 }} />
+          <Text style={{ color: '#fff', fontSize: 18, marginTop: 20, fontWeight: '600' }}>Scan QR Code</Text>
         </View>
         <TouchableOpacity
-          className="absolute bottom-10 self-center bg-primary px-8 py-3 rounded-lg"
+          style={{ position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: '#9b59b6', paddingHorizontal: 32, paddingVertical: 12, borderRadius: 12 }}
           onPress={() => {
             setShowScanner(false);
             setScanned(false);
           }}
         >
-          <Text className="text-white text-base font-semibold">Close</Text>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Close</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-white p-5 justify-center">
-      <Text className="text-3xl font-bold text-primary text-center mb-2">Join an Event</Text>
-      <Text className="text-base text-gray-600 text-center mb-10">Scan a QR code or enter an event code</Text>
+    <View style={{ flex: 1, backgroundColor: '#1a1a1a', padding: 20, justifyContent: 'center' }}>
+      <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 8 }}>Join an Event</Text>
+      <Text style={{ fontSize: 16, color: '#999', textAlign: 'center', marginBottom: 40 }}>Scan a QR code or enter an event code</Text>
 
-      <View className="w-full">
+      <View style={{ width: '100%' }}>
         <TouchableOpacity
-          className="bg-primary rounded-lg p-4 items-center mb-6"
+          style={{ backgroundColor: '#9b59b6', borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 24 }}
           onPress={() => setShowScanner(true)}
           disabled={loading}
         >
-          <Text className="text-white text-lg font-semibold">📷 Scan QR Code</Text>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '600' }}>📷 Scan QR Code</Text>
         </TouchableOpacity>
 
-        <View className="flex-row items-center my-6">
-          <View className="flex-1 h-px bg-gray-200" />
-          <Text className="mx-4 text-gray-500 text-sm">OR</Text>
-          <View className="flex-1 h-px bg-gray-200" />
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 24 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: '#333' }} />
+          <Text style={{ marginHorizontal: 16, color: '#666', fontSize: 14 }}>OR</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: '#333' }} />
         </View>
 
-        <Text className="text-base font-semibold text-gray-800 mb-2">Enter 6-Digit Event Code</Text>
+        <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 8 }}>Enter 6-Digit Event Code</Text>
         <TextInput
-          className="bg-gray-100 rounded-lg p-4 text-lg text-center tracking-widest mb-4 border border-gray-200"
+          style={{ backgroundColor: '#2a2a2a', borderRadius: 12, padding: 16, fontSize: 18, textAlign: 'center', letterSpacing: 8, marginBottom: 16, borderWidth: 1, borderColor: '#333', color: '#fff' }}
           placeholder="000000"
+          placeholderTextColor="#666"
           value={eventCode}
           onChangeText={setEventCode}
           keyboardType="numeric"
@@ -223,14 +224,14 @@ const JoinEventScreen = ({ navigation }) => {
         />
 
         <TouchableOpacity
-          className={`bg-primary rounded-lg p-4 items-center ${loading ? 'opacity-60' : ''}`}
+          style={{ backgroundColor: '#9b59b6', borderRadius: 12, padding: 16, alignItems: 'center', opacity: loading ? 0.6 : 1 }}
           onPress={handleJoinByCode}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-white text-base font-semibold">Join Event</Text>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Join Event</Text>
           )}
         </TouchableOpacity>
       </View>

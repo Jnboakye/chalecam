@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { formatDate, getStatusColor } from '../utils/helpers';
 
 const EventCard = ({ event, status, onPress }) => {
@@ -7,33 +7,73 @@ const EventCard = ({ event, status, onPress }) => {
 
   return (
     <TouchableOpacity 
-      className="bg-white rounded-xl p-4 mb-3 border border-gray-200 shadow-sm"
+      style={styles.card}
       onPress={onPress}
     >
-      <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-lg font-semibold text-gray-800 flex-1">{event.name}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title} numberOfLines={1}>{event.name}</Text>
         <View 
-          className="px-2 py-1 rounded-xl"
-          style={{ backgroundColor: statusColor }}
+          style={[styles.statusBadge, { backgroundColor: statusColor }]}
         >
-          <Text className="text-white text-xs font-semibold">{status.toUpperCase()}</Text>
+          <Text style={styles.statusText}>{status.toUpperCase()}</Text>
         </View>
       </View>
 
-      <View className="gap-1">
-        <Text className="text-sm text-gray-600">
+      <View style={styles.details}>
+        <Text style={styles.detailText}>
           📅 {formatDate(event.startTime)} - {formatDate(event.endTime)}
         </Text>
-        <Text className="text-sm text-gray-600">
+        <Text style={styles.detailText}>
           👥 {event.participants?.length || 0} participants
         </Text>
-        <Text className="text-sm text-gray-600">
+        <Text style={styles.detailText}>
           📸 {event.totalPhotos || 0} photos
         </Text>
       </View>
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#2a2a2a',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    flex: 1,
+    marginRight: 12,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  details: {
+    gap: 4,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#999',
+  },
+});
 
 export default EventCard;
 
