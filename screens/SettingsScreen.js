@@ -105,7 +105,7 @@ const SettingsScreen = () => {
       >
         {/* Account Card */}
         <TouchableOpacity style={[styles.accountCard, { backgroundColor: colors.card }]} activeOpacity={0.8}>
-          <View style={styles.avatarCircle}>
+          <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
             <Text style={styles.avatarText}>
               {displayName.charAt(0).toUpperCase()}
             </Text>

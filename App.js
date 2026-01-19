@@ -40,7 +40,10 @@ function AuthStack() {
 const EventsIcon = ({ focused }) => {
   const { colors } = useTheme();
   return (
-    <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+    <View style={[
+      styles.iconContainer, 
+      focused && [styles.activeIconContainer, { backgroundColor: colors.primary }]
+    ]}>
       <EventsIconSVG 
         size={20} 
         color={focused ? colors.text : colors.textSecondary}
@@ -146,7 +149,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeIconContainer: {
-    backgroundColor: '#9b59b6',
     borderRadius: 20,
     width: 40,
     height: 40,

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 // FAQ Icon - Question mark in circle
-export const FAQIcon = ({ size = 20, color = '#9b59b6' }) => (
+export const FAQIcon = ({ size = 20, color = '#0EA5E9' }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" fill="none" />
     <Path

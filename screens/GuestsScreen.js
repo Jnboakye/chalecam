@@ -6,9 +6,11 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 const GuestsScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
+  const { colors } = useTheme();
   const [maxGuests, setMaxGuests] = useState(eventData.maxGuests || 7);
 
   const guestOptions = [7, 25, 50, 100, 150, 200, 250, 500];
@@ -60,13 +62,15 @@ const GuestsScreen = ({ navigation, route }) => {
                 key={count}
                 style={[
                   styles.guestOption,
-                  maxGuests === count && styles.guestOptionActive,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  maxGuests === count && { backgroundColor: colors.primary, borderColor: colors.primary },
                 ]}
                 onPress={() => setMaxGuests(count)}
               >
                 <Text
                   style={[
                     styles.guestOptionText,
+                    { color: colors.text },
                     maxGuests === count && styles.guestOptionTextActive,
                   ]}
                 >
@@ -86,23 +90,23 @@ const GuestsScreen = ({ navigation, route }) => {
           <View style={styles.featuresContainer}>
             {planFeatures.map((feature, index) => (
               <View key={index} style={styles.featureRow}>
-                <View style={styles.checkmarkCircle}>
+                <View style={[styles.checkmarkCircle, { backgroundColor: colors.primary }]}>
                   <Text style={styles.checkmark}>✓</Text>
                 </View>
-                <Text style={styles.featureText}>{feature}</Text>
+                <Text style={[styles.featureText, { color: colors.text }]}>{feature}</Text>
               </View>
             ))}
           </View>
         </View>
 
         <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>Price: free</Text>
+          <Text style={[styles.priceText, { color: colors.text }]}>Price: free</Text>
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueButtonText}>Continue</Text>
-        <Text style={styles.continueArrow}>→</Text>
+      <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.surface }]} onPress={handleContinue}>
+        <Text style={[styles.continueButtonText, { color: colors.text }]}>Continue</Text>
+        <Text style={[styles.continueArrow, { color: colors.text }]}>→</Text>
       </TouchableOpacity>
     </View>
   );
@@ -174,17 +178,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: '#2a2a2a',
     borderWidth: 1,
-    borderColor: '#333',
     alignItems: 'center',
   },
-  guestOptionActive: {
-    backgroundColor: '#9b59b6',
-    borderColor: '#9b59b6',
-  },
   guestOptionText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '500',
   },
@@ -211,7 +208,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#9b59b6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -223,7 +219,6 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 16,
-    color: '#fff',
     flex: 1,
   },
   priceContainer: {
@@ -232,10 +227,8 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
   },
   continueButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 12,
     padding: 16,
     margin: 20,
@@ -244,13 +237,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   continueButtonText: {
-    color: '#000',
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
   },
   continueArrow: {
-    color: '#000',
     fontSize: 18,
     fontWeight: '600',
   },

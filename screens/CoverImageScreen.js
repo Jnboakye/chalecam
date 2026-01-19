@@ -8,9 +8,11 @@ import {
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme } from '../contexts/ThemeContext';
 
 const CoverImageScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
+  const { colors } = useTheme();
   const [coverImage, setCoverImage] = useState(eventData.coverImage || null);
 
   const pickImage = async () => {
@@ -57,11 +59,11 @@ const CoverImageScreen = ({ navigation, route }) => {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.primary }]}>
           <View style={styles.iconContainer}>
             <View style={styles.uploadIcon}>
-              <Text style={styles.uploadIconArrow}>↑</Text>
-              <View style={styles.uploadIconLine} />
+              <Text style={[styles.uploadIconArrow, { color: colors.primary }]}>↑</Text>
+              <View style={[styles.uploadIconLine, { backgroundColor: colors.primary }]} />
             </View>
           </View>
           <Text style={styles.cardTitle}>Select cover image</Text>
@@ -134,12 +136,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    backgroundColor: '#2a2a2a',
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#9b59b6',
   },
   iconContainer: {
     marginBottom: 24,
@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
   },
   uploadIconArrow: {
     fontSize: 32,
-    color: '#9b59b6',
     fontWeight: '300',
   },
   uploadIconLine: {
@@ -160,7 +159,6 @@ const styles = StyleSheet.create({
     bottom: 10,
     width: 40,
     height: 2,
-    backgroundColor: '#9b59b6',
   },
   cardTitle: {
     fontSize: 24,

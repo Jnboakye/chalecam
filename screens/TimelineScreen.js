@@ -9,9 +9,11 @@ import {
   Animated,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '../contexts/ThemeContext';
 
 const TimelineScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
+  const { colors } = useTheme();
   const [startDate, setStartDate] = useState(
     eventData.startDate || new Date()
   );
@@ -230,7 +232,8 @@ const TimelineScreen = ({ navigation, route }) => {
             <TouchableOpacity
               style={[
                 styles.dateInput,
-                startDateSelected && styles.dateInputSelected,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                startDateSelected && { borderColor: colors.primary, borderWidth: 2 },
               ]}
               onPress={() => setShowStartPicker(true)}
             >
@@ -269,7 +272,8 @@ const TimelineScreen = ({ navigation, route }) => {
             <TouchableOpacity
               style={[
                 styles.dateInput,
-                endDateSelected && styles.dateInputSelected,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                endDateSelected && { borderColor: colors.primary, borderWidth: 2 },
               ]}
               onPress={() => setShowEndPicker(true)}
             >
@@ -311,13 +315,15 @@ const TimelineScreen = ({ navigation, route }) => {
                 key={option.value}
                 style={[
                   styles.revealOption,
-                  revealPhotos === option.value && styles.revealOptionActive,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  revealPhotos === option.value && { backgroundColor: colors.primary, borderColor: colors.primary },
                 ]}
                 onPress={() => handleRevealChange(option.value)}
               >
                 <Text
                   style={[
                     styles.revealOptionText,
+                    { color: colors.text },
                     revealPhotos === option.value && styles.revealOptionTextActive,
                   ]}
                 >
@@ -336,13 +342,13 @@ const TimelineScreen = ({ navigation, route }) => {
       {/* Continue Button - Animated In */}
       {revealSelected && (
         <Animated.View style={continueAnimatedStyle}>
-          <TouchableOpacity 
-            style={styles.continueButton}
-            onPress={handleContinue}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-            <Text style={styles.continueArrow}>→</Text>
-          </TouchableOpacity>
+      <TouchableOpacity 
+        style={[styles.continueButton, { backgroundColor: colors.surface }]}
+        onPress={handleContinue}
+      >
+        <Text style={[styles.continueButtonText, { color: colors.text }]}>Continue</Text>
+        <Text style={[styles.continueArrow, { color: colors.text }]}>→</Text>
+      </TouchableOpacity>
         </Animated.View>
       )}
     </View>
@@ -409,18 +415,10 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     flex: 1,
-    backgroundColor: '#2a2a2a',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#333',
     marginRight: 12,
-    transition: 'all 0.3s ease',
-  },
-  dateInputSelected: {
-    borderColor: '#9b59b6',
-    borderWidth: 2,
-    backgroundColor: '#2a1a3a',
   },
   dateText: {
     color: '#fff',
@@ -455,19 +453,12 @@ const styles = StyleSheet.create({
   },
   revealOption: {
     flex: 1,
-    backgroundColor: '#2a2a2a',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#333',
-  },
-  revealOptionActive: {
-    backgroundColor: '#9b59b6',
-    borderColor: '#9b59b6',
   },
   revealOptionText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -481,27 +472,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   continueButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 12,
     padding: 16,
     margin: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#9b59b6',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   continueButtonText: {
-    color: '#000',
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
   },
   continueArrow: {
-    color: '#000',
     fontSize: 18,
     fontWeight: '600',
   },

@@ -7,9 +7,11 @@ import {
   ScrollView,
   Switch,
 } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 const PhotosPerGuestScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
+  const { colors } = useTheme();
   const [photosPerGuest, setPhotosPerGuest] = useState(
     eventData.photosPerGuest || 5
   );
@@ -61,7 +63,8 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
               key={count}
               style={[
                 styles.photoOption,
-                !unlimited && photosPerGuest === count && styles.photoOptionActive,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                !unlimited && photosPerGuest === count && { backgroundColor: colors.primary, borderColor: colors.primary },
               ]}
               onPress={() => {
                 setPhotosPerGuest(count);
@@ -71,6 +74,7 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
               <Text
                 style={[
                   styles.photoOptionText,
+                  { color: colors.text },
                   !unlimited && photosPerGuest === count && styles.photoOptionTextActive,
                 ]}
               >
@@ -80,19 +84,19 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
           ))}
         </View>
 
-        <View style={styles.unlimitedCard}>
+        <View style={[styles.unlimitedCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
           <View style={styles.unlimitedHeader}>
             <View style={styles.unlimitedLeft}>
-              <Text style={styles.unlimitedTitle}>Unlimited photos</Text>
-              <View style={styles.priceTag}>
+              <Text style={[styles.unlimitedTitle, { color: colors.text }]}>Unlimited photos</Text>
+              <View style={[styles.priceTag, { backgroundColor: colors.success }]}>
                 <Text style={styles.priceTagText}>+11,99 €</Text>
               </View>
             </View>
-            <View style={styles.popularTag}>
+            <View style={[styles.popularTag, { backgroundColor: colors.warning }]}>
               <Text style={styles.popularTagText}>POPULAR</Text>
             </View>
           </View>
-          <Text style={styles.unlimitedDescription}>
+          <Text style={[styles.unlimitedDescription, { color: colors.textSecondary }]}>
             Allow each guest to take unlimited photos during your event.
           </Text>
           <View style={styles.unlimitedToggle}>
@@ -106,16 +110,16 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
                   setPhotosPerGuest(5);
                 }
               }}
-              trackColor={{ false: '#333', true: '#9b59b6' }}
+              trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor="#fff"
             />
           </View>
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueButtonText}>Continue</Text>
-        <Text style={styles.continueArrow}>→</Text>
+      <TouchableOpacity style={[styles.continueButton, { backgroundColor: colors.surface }]} onPress={handleContinue}>
+        <Text style={[styles.continueButtonText, { color: colors.text }]}>Continue</Text>
+        <Text style={[styles.continueArrow, { color: colors.text }]}>→</Text>
       </TouchableOpacity>
     </View>
   );
@@ -178,17 +182,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#2a2a2a',
     borderWidth: 1,
-    borderColor: '#333',
     alignItems: 'center',
   },
-  photoOptionActive: {
-    backgroundColor: '#9b59b6',
-    borderColor: '#9b59b6',
-  },
   photoOptionText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '500',
   },
@@ -197,11 +194,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   unlimitedCard: {
-    backgroundColor: '#2a2a2a',
     borderRadius: 16,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#9b59b6',
   },
   unlimitedHeader: {
     flexDirection: 'row',
@@ -217,11 +212,9 @@ const styles = StyleSheet.create({
   unlimitedTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
     marginRight: 12,
   },
   priceTag: {
-    backgroundColor: '#4caf50',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -244,7 +237,6 @@ const styles = StyleSheet.create({
   },
   unlimitedDescription: {
     fontSize: 14,
-    color: '#999',
     marginBottom: 16,
     lineHeight: 20,
   },
@@ -252,7 +244,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   continueButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 12,
     padding: 16,
     margin: 20,
@@ -261,13 +252,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   continueButtonText: {
-    color: '#000',
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
   },
   continueArrow: {
-    color: '#000',
     fontSize: 18,
     fontWeight: '600',
   },

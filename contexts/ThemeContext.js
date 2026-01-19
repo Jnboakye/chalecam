@@ -61,18 +61,19 @@ export const ThemeProvider = ({ children }) => {
     mode: themeMode,
     isDark,
     colors: {
-      background: isDark ? '#1a1a1a' : '#ffffff',
-      surface: isDark ? '#2a2a2a' : '#f5f5f5',
-      card: isDark ? '#2a2a2a' : '#ffffff',
-      text: isDark ? '#ffffff' : '#000000',
-      textSecondary: isDark ? '#999999' : '#666666',
-      border: isDark ? '#333333' : '#e0e0e0',
-      primary: '#9b59b6',
-      primaryDark: '#7d3fa3',
-      error: '#ff4444',
-      success: '#4caf50',
-      warning: '#ffc107',
-      info: '#2196f3',
+      // Light mode colors
+      primary: isDark ? '#38BDF8' : '#0EA5E9',      // Sky blue (light) / Lighter blue (dark)
+      secondary: isDark ? '#2DD4BF' : '#14B8A6',    // Teal (light) / Lighter teal (dark)
+      background: isDark ? '#0F172A' : '#FFFFFF',
+      surface: isDark ? '#1E293B' : '#F8FAFC',
+      card: isDark ? '#1E293B' : '#FFFFFF',
+      text: isDark ? '#F1F5F9' : '#0F172A',
+      textSecondary: isDark ? '#94A3B8' : '#64748B',
+      border: isDark ? '#334155' : '#E2E8F0',
+      success: isDark ? '#4ADE80' : '#22C55E',
+      error: isDark ? '#F87171' : '#EF4444',
+      warning: isDark ? '#FBBF24' : '#F59E0B',
+      info: isDark ? '#38BDF8' : '#0EA5E9',
       isDark, // Include isDark in colors for convenience
     },
     updateThemeMode,

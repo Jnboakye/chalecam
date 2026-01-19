@@ -13,11 +13,13 @@ import { collection, addDoc, serverTimestamp, arrayUnion, updateDoc, doc } from 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { generate6DigitCode } from '../utils/helpers';
 
 const EventSummaryScreen = ({ navigation, route }) => {
   const { eventData = {} } = route.params || {};
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
 
   const formatDate = (date) => {
@@ -296,7 +298,6 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   saveButton: {
-    backgroundColor: '#9b59b6',
     borderRadius: 12,
     padding: 16,
     margin: 20,
@@ -306,7 +307,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
