@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-// import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import {
@@ -26,11 +26,9 @@ const firebaseConfig = {
 // Initialize Firebase App (only if not already initialized)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// TODO: Re-enable authentication later
 // Initialize Auth - use getAuth for React Native (simpler and more reliable)
 // getAuth automatically handles persistence in React Native
-// const auth = getAuth(app);
-const auth = null;
+const auth = getAuth(app);
 
 // Initialize Firestore
 export const db = getFirestore(app);

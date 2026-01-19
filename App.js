@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { EventsIcon as EventsIconSVG, JoinEventIcon as JoinEventIconSVG, SettingsIcon as SettingsIconSVG } from './components/Icons';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import EmailLoginScreen from './screens/EmailLoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import CreateEventScreen from './screens/CreateEventScreen';
 import EventDetailScreen from './screens/EventDetailScreen';
@@ -29,9 +30,13 @@ const Tab = createBottomTabNavigator();
 
 function AuthStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Login"
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="EmailLogin" component={EmailLoginScreen} />
     </Stack.Navigator>
   );
 }
@@ -268,21 +273,18 @@ function MainStack() {
 function RootNavigator() {
   const { user, loading } = useAuth();
 
-  // TODO: Remove this bypass when auth is ready
-  // Temporarily bypass auth to see screens
-  const BYPASS_AUTH = true;
-
-  if (loading && !BYPASS_AUTH) {
+  // Show loading indicator while checking auth state
+  if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#6200EA" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a' }}>
+        <ActivityIndicator size="large" color="#9b59b6" />
       </View>
     );
   }
 
   return (
     <NavigationContainer>
-      {BYPASS_AUTH ? <MainStack /> : (user ? <MainStack /> : <AuthStack />)}
+      {user ? <MainStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

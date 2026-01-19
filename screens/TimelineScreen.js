@@ -205,7 +205,13 @@ const TimelineScreen = ({ navigation, route }) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('MainTabs');
+            }
+          }}
         >
           <View style={styles.backButtonCircle}>
             <Text style={styles.backArrow}>←</Text>
