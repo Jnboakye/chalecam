@@ -12,11 +12,13 @@ import {
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import EventCard from '../components/EventCard';
 import { getEventStatus } from '../utils/helpers';
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('recent');
   const [myEvents, setMyEvents] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
@@ -90,13 +92,13 @@ const HomeScreen = ({ navigation }) => {
     if (activeTab === 'recent') {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No recent events</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No recent events</Text>
         </View>
       );
     }
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>You haven't created any events yet</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>You haven't created any events yet</Text>
       </View>
     );
   };
@@ -105,34 +107,34 @@ const HomeScreen = ({ navigation }) => {
   const hasEvents = currentEvents.length > 0;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Top Header with Tabs */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'recent' && styles.activeTab]}
             onPress={() => setActiveTab('recent')}
           >
-            <Text style={[styles.tabText, activeTab === 'recent' && styles.activeTabText]}>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'recent' && { color: colors.text, fontWeight: '600' }]}>
               Recent
             </Text>
-            {activeTab === 'recent' && <View style={styles.tabUnderline} />}
+            {activeTab === 'recent' && <View style={[styles.tabUnderline, { backgroundColor: colors.primary }]} />}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'myEvents' && styles.activeTab]}
             onPress={() => setActiveTab('myEvents')}
           >
-            <Text style={[styles.tabText, activeTab === 'myEvents' && styles.activeTabText]}>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === 'myEvents' && { color: colors.text, fontWeight: '600' }]}>
               My events
             </Text>
-            {activeTab === 'myEvents' && <View style={styles.tabUnderline} />}
+            {activeTab === 'myEvents' && <View style={[styles.tabUnderline, { backgroundColor: colors.primary }]} />}
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={styles.newEventButton}
+          style={[styles.newEventButton, { backgroundColor: colors.surface }]}
           onPress={() => navigation.navigate('CreateEvent')}
         >
-          <Text style={styles.newEventButtonText}>New event +</Text>
+          <Text style={[styles.newEventButtonText, { color: colors.text }]}>New event +</Text>
         </TouchableOpacity>
       </View>
 
@@ -140,7 +142,7 @@ const HomeScreen = ({ navigation }) => {
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#9b59b6" />
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
         ) : hasEvents ? (
           <FlatList
@@ -154,26 +156,26 @@ const HomeScreen = ({ navigation }) => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#9b59b6"
+                tintColor={colors.primary}
               />
             }
           />
         ) : (
-          <View style={styles.createEventCard}>
+          <View style={[styles.createEventCard, { backgroundColor: colors.card, borderColor: colors.primary }]}>
             <View style={styles.createEventIconContainer}>
               <View style={styles.createEventIconCircle}>
                 <Text style={styles.createEventIcon}>+</Text>
               </View>
             </View>
-            <Text style={styles.createEventTitle}>Create event</Text>
-            <Text style={styles.createEventDescription}>
+            <Text style={[styles.createEventTitle, { color: colors.text }]}>Create event</Text>
+            <Text style={[styles.createEventDescription, { color: colors.text }]}>
               Let's start by setting up your first event
             </Text>
             <TouchableOpacity
-              style={styles.setupButton}
+              style={[styles.setupButton, { backgroundColor: colors.isDark ? '#fff' : '#000' }]}
               onPress={() => navigation.navigate('CreateEvent')}
             >
-              <Text style={styles.setupButtonText}>Setup my event</Text>
+              <Text style={[styles.setupButtonText, { color: colors.isDark ? '#000' : '#fff' }]}>Setup my event</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -185,7 +187,6 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
@@ -194,7 +195,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 15,
-    backgroundColor: '#1a1a1a',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -208,13 +208,8 @@ const styles = StyleSheet.create({
     // Active tab styling
   },
   tabText: {
-    color: '#999',
     fontSize: 16,
     fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   tabUnderline: {
     position: 'absolute',
@@ -222,16 +217,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: '#9b59b6',
   },
   newEventButton: {
-    backgroundColor: '#2a2a2a',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
   newEventButtonText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -251,11 +243,11 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   createEventCard: {
-    backgroundColor: '#2a2a2a',
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
     marginTop: 40,
+    borderWidth: 1,
   },
   createEventIconContainer: {
     marginBottom: 24,
