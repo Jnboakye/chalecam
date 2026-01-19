@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ScrollView
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +20,7 @@ import { getEventStatus } from '../utils/helpers';
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState('recent');
   const [myEvents, setMyEvents] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
@@ -108,8 +110,16 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Top Header with Tabs */}
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
+      {/* Top Header with Tabs - Fixed */}
+      <View 
+        style={[
+          styles.header, 
+          { 
+            backgroundColor: colors.background,
+            paddingTop: insets.top + 10,
+          }
+        ]}
+      >
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'recent' && styles.activeTab]}
@@ -138,8 +148,14 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Content Area */}
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      {/* Content Area - Scrollable */}
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: insets.bottom + 100 } // Add space for tab bar + safe area
+        ]}
+      >
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
@@ -193,7 +209,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 50,
     paddingBottom: 15,
   },
   tabContainer: {

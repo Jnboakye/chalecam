@@ -3,8 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { EventsIcon as EventsIconSVG, JoinEventIcon as JoinEventIconSVG, SettingsIcon as SettingsIconSVG } from './components/Icons';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -34,37 +36,49 @@ function AuthStack() {
   );
 }
 
-// Events Icon Component - Purple circle with camera icon
-const EventsIcon = ({ focused }) => (
-  <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
-    {focused ? (
-      <View style={styles.eventsIconActive}>
-        <Text style={styles.eventsIconText}>📸</Text>
-      </View>
-    ) : (
-      <View style={styles.eventsIconInactive}>
-        <Text style={styles.eventsIconTextInactive}>📸</Text>
-      </View>
-    )}
-  </View>
-);
+// Events Icon Component - Camera icon
+const EventsIcon = ({ focused }) => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+      <EventsIconSVG 
+        size={20} 
+        color={focused ? colors.text : colors.textSecondary}
+        focused={focused}
+      />
+    </View>
+  );
+};
 
-// Join Event Icon Component (QR Code style)
-const JoinEventIcon = ({ focused }) => (
-  <View style={styles.iconContainer}>
-    <Text style={[styles.iconText, focused && styles.activeIconText]}>📷</Text>
-  </View>
-);
+// Join Event Icon Component - QR Code icon
+const JoinEventIcon = ({ focused }) => {
+  const { colors } = useTheme();
+  return (
+    <View style={styles.iconContainer}>
+      <JoinEventIconSVG 
+        size={24} 
+        color={focused ? colors.text : colors.textSecondary}
+      />
+    </View>
+  );
+};
 
-// Settings Icon Component
-const SettingsIcon = ({ focused }) => (
-  <View style={styles.iconContainer}>
-    <Text style={[styles.iconText, focused && styles.activeIconText]}>⚙️</Text>
-  </View>
-);
+// Settings Icon Component - Gear icon
+const SettingsIcon = ({ focused }) => {
+  const { colors } = useTheme();
+  return (
+    <View style={styles.iconContainer}>
+      <SettingsIconSVG 
+        size={24} 
+        color={focused ? colors.text : colors.textSecondary}
+      />
+    </View>
+  );
+};
 
 function MainTabs() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -74,13 +88,20 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopWidth: 0,
-          height: 70,
-          paddingBottom: 10,
+          height: 70 + insets.bottom, // Add safe area padding
+          paddingBottom: insets.bottom + 10,
           paddingTop: 10,
-          borderRadius: 20,
           position: 'absolute',
-          marginHorizontal: 20,
-          marginBottom: 20,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 20, // Android shadow
+          shadowColor: '#000', // iOS shadow
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          overflow: 'hidden',
+          opacity: 1, // Ensure fully opaque
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -127,6 +148,10 @@ const styles = StyleSheet.create({
   activeIconContainer: {
     backgroundColor: '#9b59b6',
     borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eventsIconActive: {
     width: 32,

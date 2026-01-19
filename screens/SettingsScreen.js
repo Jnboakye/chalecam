@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { FAQIcon } from '../components/Icons';
 
 const SettingsScreen = () => {
   const { user, logout } = useAuth();
   const { mode: themeMode, updateThemeMode, toggleTheme, colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const displayName =
     user?.displayName ||
@@ -78,13 +81,28 @@ const SettingsScreen = () => {
 
   return (
     <View style={[styles.container, dynamicStyles.container]}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+      {/* Fixed Header */}
+      <View 
+        style={[
+          styles.headerContainer,
+          { 
+            backgroundColor: colors.background,
+            paddingTop: insets.top + 10,
+          }
+        ]}
       >
         <Text style={[styles.headerTitle, dynamicStyles.headerTitle]}>Settings</Text>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: insets.bottom + 100 } // Add space for tab bar + safe area
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Account Card */}
         <TouchableOpacity style={[styles.accountCard, { backgroundColor: colors.card }]} activeOpacity={0.8}>
           <View style={styles.avatarCircle}>
@@ -115,7 +133,7 @@ const SettingsScreen = () => {
             colors={colors}
           />
           <SettingsRow
-            icon="？"
+            icon={<FAQIcon size={20} color={colors.primary} />}
             label="FAQ"
             onPress={() => handleSupportPress('FAQ')}
             isLast
@@ -217,7 +235,13 @@ const SettingsRow = ({
     onPress={onPress}
   >
     <View style={styles.rowLeft}>
-      <Text style={styles.rowIcon}>{icon}</Text>
+      <View style={styles.rowIconContainer}>
+        {typeof icon === 'string' ? (
+          <Text style={styles.rowIcon}>{icon}</Text>
+        ) : (
+          icon
+        )}
+      </View>
       <Text
         style={[
           styles.rowLabel,
@@ -246,8 +270,12 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
   contentContainer: {
-    paddingTop: 60,
+    paddingTop: 10,
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
@@ -322,9 +350,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  rowIconContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   rowIcon: {
     fontSize: 18,
-    marginRight: 12,
   },
   rowLabel: {
     fontSize: 16,
