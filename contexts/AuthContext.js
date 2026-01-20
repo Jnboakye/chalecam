@@ -15,6 +15,11 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
 import { Alert } from 'react-native';
+import {
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_ANDROID_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
+} from '@env';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -33,16 +38,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Google Auth Configuration
-  // Note: You'll need to add these to your .env file:
-  // GOOGLE_IOS_CLIENT_ID=your_ios_client_id
-  // GOOGLE_ANDROID_CLIENT_ID=your_android_client_id  
-  // GOOGLE_WEB_CLIENT_ID=your_web_client_id
-  // Or get them from Firebase Console -> Project Settings -> General -> Your apps
-  // For now, using placeholder values - replace with actual Client IDs from Firebase
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    iosClientId: 'YOUR_IOS_CLIENT_ID', // Replace with actual iOS Client ID
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID', // Replace with actual Android Client ID
-    webClientId: 'YOUR_WEB_CLIENT_ID', // Replace with actual Web Client ID from Firebase
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
   });
 
   // Facebook Auth Configuration
