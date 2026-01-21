@@ -14,7 +14,8 @@ import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
+import * as AuthSession from 'expo-auth-session';
 import {
   GOOGLE_IOS_CLIENT_ID,
   GOOGLE_ANDROID_CLIENT_ID,
@@ -38,11 +39,39 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Google Auth Configuration
+  // Force HTTPS proxy URL for local development (Google doesn't accept exp:// URIs)
+  // The HTTPS proxy works even in local development
+  const redirectUri = AuthSession.makeRedirectUri({
+    useProxy: true, // Force HTTPS proxy (works in local dev)
+  });
+
+  // If it still generates exp://, force the HTTPS proxy URL
+  const finalRedirectUri = redirectUri.startsWith('exp://') 
+    ? 'https://auth.expo.io/@anonymous/chalecam'
+    : redirectUri;
+
+  console.log('=== GOOGLE OAUTH REDIRECT URI ===');
+  console.log('Generated:', redirectUri);
+  console.log('Using:', finalRedirectUri);
+  console.log('Make sure this URL is in Google Cloud Console Web Client ID');
+  console.log('==================================');
+
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID, // Required for iOS
     androidClientId: GOOGLE_ANDROID_CLIENT_ID,
     webClientId: GOOGLE_WEB_CLIENT_ID,
+    redirectUri: 'https://auth.expo.io/@anonymous/chalecam', // Force HTTPS proxy URL
+    scopes: ['openid', 'profile', 'email'],
   });
+
+  // Debug: Log the request configuration
+  if (googleRequest) {
+    console.log('Google Auth Request Config:', {
+      redirectUri: googleRequest.redirectUri || 'not set',
+      clientId: googleRequest.clientId || 'not set',
+      url: googleRequest.url || 'not set',
+    });
+  }
 
   // Facebook Auth Configuration
   // Note: You'll need to add FACEBOOK_APP_ID to your .env file
