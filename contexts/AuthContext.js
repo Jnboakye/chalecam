@@ -56,21 +56,33 @@ export const AuthProvider = ({ children }) => {
   console.log('Make sure this URL is in Google Cloud Console Web Client ID');
   console.log('==================================');
 
+  // Force the exact HTTPS proxy URL that's in Google Cloud Console
+  const forcedRedirectUri = 'https://auth.expo.io/@anonymous/chalecam';
+
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
     iosClientId: GOOGLE_IOS_CLIENT_ID, // Required for iOS
     androidClientId: GOOGLE_ANDROID_CLIENT_ID,
     webClientId: GOOGLE_WEB_CLIENT_ID,
-    redirectUri: 'https://auth.expo.io/@anonymous/chalecam', // Force HTTPS proxy URL
+    redirectUri: forcedRedirectUri, // Force HTTPS proxy URL
     scopes: ['openid', 'profile', 'email'],
   });
 
-  // Debug: Log the request configuration
+  // Debug: Log the actual request URL to see what's being sent to Google
   if (googleRequest) {
-    console.log('Google Auth Request Config:', {
-      redirectUri: googleRequest.redirectUri || 'not set',
-      clientId: googleRequest.clientId || 'not set',
-      url: googleRequest.url || 'not set',
-    });
+    console.log('=== GOOGLE AUTH REQUEST DEBUG ===');
+    console.log('Redirect URI in config:', forcedRedirectUri);
+    console.log('Redirect URI in request:', googleRequest.redirectUri);
+    console.log('Full request URL:', googleRequest.url);
+    console.log('Client ID being used:', googleRequest.clientId);
+    
+    // Extract redirect_uri from the URL to see what Google actually receives
+    if (googleRequest.url) {
+      const urlObj = new URL(googleRequest.url);
+      const redirectParam = urlObj.searchParams.get('redirect_uri');
+      console.log('Redirect URI in actual OAuth URL:', redirectParam);
+      console.log('⚠️ This MUST match Google Cloud Console exactly!');
+    }
+    console.log('================================');
   }
 
   // Facebook Auth Configuration
