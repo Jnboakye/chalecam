@@ -14,7 +14,7 @@ import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
 import {
   GOOGLE_IOS_CLIENT_ID,
@@ -38,52 +38,74 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Google Auth Configuration
-  // Force HTTPS proxy URL for local development (Google doesn't accept exp:// URIs)
-  // The HTTPS proxy works even in local development
+  // Google OAuth Configuration
+  // Strategy: Use Web Client ID for all platforms to support HTTPS redirect URIs
+  // The Web Client ID accepts HTTPS redirects like https://auth.expo.io/@jnboakye/chalecam
+  // iOS Client IDs expect custom URL schemes, which don't work with Expo's proxy
+  
+  // Generate redirect URI using Expo's HTTPS proxy
+  // This creates: https://auth.expo.io/@jnboakye/chalecam
   const redirectUri = AuthSession.makeRedirectUri({
-    useProxy: true, // Force HTTPS proxy (works in local dev)
+    useProxy: true, // Use Expo's HTTPS proxy for OAuth redirects
   });
 
-  // If it still generates exp://, force the HTTPS proxy URL
-  const finalRedirectUri = redirectUri.startsWith('exp://') 
-    ? 'https://auth.expo.io/@anonymous/chalecam'
-    : redirectUri;
+  // Ensure we use the correct redirect URI with your username
+  const finalRedirectUri = redirectUri.includes('@jnboakye')
+    ? redirectUri
+    : 'https://auth.expo.io/@jnboakye/chalecam';
 
-  console.log('=== GOOGLE OAUTH REDIRECT URI ===');
-  console.log('Generated:', redirectUri);
-  console.log('Using:', finalRedirectUri);
-  console.log('Make sure this URL is in Google Cloud Console Web Client ID');
-  console.log('==================================');
-
-  // Force the exact HTTPS proxy URL that's in Google Cloud Console
-  const forcedRedirectUri = 'https://auth.expo.io/@anonymous/chalecam';
-
+  // Configure Google OAuth
+  // Use Web Client ID for iosClientId (required on iOS) to support HTTPS redirects
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    iosClientId: GOOGLE_IOS_CLIENT_ID, // Required for iOS
+    iosClientId: GOOGLE_WEB_CLIENT_ID, // Web Client ID works with HTTPS redirects
     androidClientId: GOOGLE_ANDROID_CLIENT_ID,
     webClientId: GOOGLE_WEB_CLIENT_ID,
-    redirectUri: forcedRedirectUri, // Force HTTPS proxy URL
+    redirectUri: finalRedirectUri,
     scopes: ['openid', 'profile', 'email'],
   });
 
-  // Debug: Log the actual request URL to see what's being sent to Google
-  if (googleRequest) {
-    console.log('=== GOOGLE AUTH REQUEST DEBUG ===');
-    console.log('Redirect URI in config:', forcedRedirectUri);
-    console.log('Redirect URI in request:', googleRequest.redirectUri);
-    console.log('Full request URL:', googleRequest.url);
-    console.log('Client ID being used:', googleRequest.clientId);
-    
-    // Extract redirect_uri from the URL to see what Google actually receives
-    if (googleRequest.url) {
-      const urlObj = new URL(googleRequest.url);
-      const redirectParam = urlObj.searchParams.get('redirect_uri');
-      console.log('Redirect URI in actual OAuth URL:', redirectParam);
-      console.log('⚠️ This MUST match Google Cloud Console exactly!');
+  // Debug logging
+  console.log('=== GOOGLE OAUTH SETUP ===');
+  console.log('Platform:', Platform.OS);
+  console.log('Redirect URI:', finalRedirectUri);
+  console.log('Web Client ID:', GOOGLE_WEB_CLIENT_ID);
+  console.log('');
+  console.log('⚠️ GOOGLE CLOUD CONSOLE CONFIGURATION:');
+  console.log('1. Go to: https://console.cloud.google.com/apis/credentials');
+  console.log('2. Select your project: chalecam-c7da2');
+  console.log('3. Click on Web Client ID:');
+  console.log('   315065179459-ea0uemlu4egagj1n7phvc2ocoohe30uh.apps.googleusercontent.com');
+  console.log('4. Under "Authorized redirect URIs", add:');
+  console.log('   https://auth.expo.io/@jnboakye/chalecam');
+  console.log('5. Under "Authorized JavaScript origins", add:');
+  console.log('   https://auth.expo.io');
+  console.log('6. Click "Save" and wait a few minutes for changes to propagate');
+  console.log('==========================');
+
+  // Additional debug: Log the actual OAuth request details
+  useEffect(() => {
+    if (googleRequest?.url) {
+      try {
+        const urlObj = new URL(googleRequest.url);
+        const clientIdParam = urlObj.searchParams.get('client_id');
+        const redirectParam = urlObj.searchParams.get('redirect_uri');
+        console.log('=== OAUTH REQUEST DETAILS ===');
+        console.log('Client ID being used:', clientIdParam);
+        console.log('Redirect URI in request:', redirectParam);
+        console.log('Expected Client ID:', GOOGLE_WEB_CLIENT_ID);
+        console.log('Expected Redirect URI:', finalRedirectUri);
+        if (clientIdParam !== GOOGLE_WEB_CLIENT_ID) {
+          console.warn('⚠️ WARNING: Client ID mismatch!');
+        }
+        if (redirectParam !== finalRedirectUri) {
+          console.warn('⚠️ WARNING: Redirect URI mismatch!');
+        }
+        console.log('=============================');
+      } catch (e) {
+        console.log('Could not parse OAuth request URL');
+      }
     }
-    console.log('================================');
-  }
+  }, [googleRequest, finalRedirectUri]);
 
   // Facebook Auth Configuration
   // Note: You'll need to add FACEBOOK_APP_ID to your .env file
