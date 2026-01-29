@@ -177,9 +177,20 @@ export const AuthProvider = ({ children }) => {
         setUser(user);
         setLoading(false);
         
+        // Wait a bit to ensure auth token is fully propagated to Firestore
+        // This helps avoid permission errors right after sign-in
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Then try to fetch/update Firestore document in background
         // This won't block navigation
         try {
+          // Get fresh auth token to ensure it's available for Firestore
+          const token = await user.getIdToken();
+          if (!token) {
+            console.warn('No auth token available for Firestore access');
+            return;
+          }
+          
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             // Update user state with Firestore data
@@ -205,12 +216,24 @@ export const AuthProvider = ({ children }) => {
               // Firestore failed, but user is still signed in
               // Keep the user state as is
               console.error('Error creating user document:', firestoreError);
+              if (firestoreError.code === 'permission-denied') {
+                console.error('⚠️ Firestore permission denied. Please check your Firestore security rules in Firebase Console.');
+                console.error('Expected rule: allow read: if request.auth != null;');
+                console.error('Expected rule: allow write: if request.auth.uid == userId;');
+              }
             }
           }
         } catch (error) {
           // Firestore error, but user is still signed in
           // User state is already set above, so navigation will work
           console.error('Error fetching user document:', error);
+          if (error.code === 'permission-denied') {
+            console.error('⚠️ Firestore permission denied. Please check your Firestore security rules in Firebase Console.');
+            console.error('Go to: Firebase Console > Firestore Database > Rules');
+            console.error('Expected rule for users collection:');
+            console.error('  allow read: if request.auth != null;');
+            console.error('  allow write: if request.auth != null && request.auth.uid == userId;');
+          }
         }
       } else {
         setUser(null);
