@@ -7,10 +7,20 @@ import {
   ScrollView,
   Platform,
   Animated,
+  Modal,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
+
+const START_DATE_INFO_TITLE = 'Start date & time';
+const START_DATE_INFO_MESSAGE =
+  'This is when your event begins. Guests will be able to join and take photos from this moment. Choose the date and time that works best for your event.';
+
+const END_DATE_INFO_TITLE = 'End date & time';
+const END_DATE_INFO_MESSAGE =
+  'This is when your event ends. After this time, guests can no longer upload new photos to this event. Make sure the end time gives everyone enough time to share their photos.';
 
 const TimelineScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
@@ -247,24 +257,15 @@ const TimelineScreen = ({ navigation, route }) => {
             >
               <Text style={[styles.dateText, { color: colors.text }]}>{formatDateTime(startDate)}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.infoButton}>
+            <TouchableOpacity
+              style={styles.infoButton}
+              onPress={() => Alert.alert(START_DATE_INFO_TITLE, START_DATE_INFO_MESSAGE)}
+            >
               <View style={[styles.infoCircle, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.infoText, { color: colors.text }]}>i</Text>
               </View>
             </TouchableOpacity>
           </View>
-          {showStartPicker && (
-            <DateTimePicker
-              value={startDate}
-              mode="datetime"
-              is24Hour={false}
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowStartPicker(Platform.OS === 'ios');
-                handleStartDateChange(selectedDate);
-              }}
-            />
-          )}
         </View>
 
         {/* End Date Section - Animated In */}
@@ -287,24 +288,15 @@ const TimelineScreen = ({ navigation, route }) => {
             >
               <Text style={[styles.dateText, { color: colors.text }]}>{formatDateTime(endDate)}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.infoButton}>
+            <TouchableOpacity
+              style={styles.infoButton}
+              onPress={() => Alert.alert(END_DATE_INFO_TITLE, END_DATE_INFO_MESSAGE)}
+            >
               <View style={[styles.infoCircle, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.infoText, { color: colors.text }]}>i</Text>
               </View>
             </TouchableOpacity>
           </View>
-          {showEndPicker && (
-            <DateTimePicker
-              value={endDate}
-              mode="datetime"
-              is24Hour={false}
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowEndPicker(Platform.OS === 'ios');
-                handleEndDateChange(selectedDate);
-              }}
-            />
-          )}
           </Animated.View>
         )}
 
@@ -358,6 +350,85 @@ const TimelineScreen = ({ navigation, route }) => {
         <Text style={[styles.continueArrow, { color: colors.text }]}>→</Text>
       </TouchableOpacity>
         </Animated.View>
+      )}
+
+      {/* Date/Time picker modal (iOS: spinner in modal; Android: native dialog, no modal) */}
+      {Platform.OS === 'ios' && (showStartPicker || showEndPicker) && (
+        <Modal
+          visible
+          transparent
+          animationType="slide"
+          onRequestClose={() => {
+            setShowStartPicker(false);
+            setShowEndPicker(false);
+          }}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={() => {
+                setShowStartPicker(false);
+                setShowEndPicker(false);
+              }}
+            />
+            <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {showStartPicker ? 'Start date & time' : 'End date & time'}
+              </Text>
+              <View style={[styles.pickerContainer, Platform.OS === 'ios' && styles.pickerContainerIOS]}>
+                <DateTimePicker
+                  value={showStartPicker ? startDate : endDate}
+                  mode="datetime"
+                  is24Hour={false}
+                  display={Platform.OS === 'ios' ? 'inline' : 'spinner'}
+                  themeVariant={colors.isDark ? 'dark' : 'light'}
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) {
+                      if (showStartPicker) {
+                        handleStartDateChange(selectedDate);
+                      } else {
+                        handleEndDateChange(selectedDate);
+                      }
+                    }
+                  }}
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.modalConfirmButton, { backgroundColor: colors.primary }]}
+                onPress={() => {
+                  setShowStartPicker(false);
+                  setShowEndPicker(false);
+                }}
+              >
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Android: native date/time dialog only (invisible trigger, no inline picker below box) */}
+      {Platform.OS === 'android' && (showStartPicker || showEndPicker) && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <DateTimePicker
+            value={showStartPicker ? startDate : endDate}
+            mode="datetime"
+            is24Hour={false}
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowStartPicker(false);
+              setShowEndPicker(false);
+              if (selectedDate) {
+                if (showStartPicker) {
+                  handleStartDateChange(selectedDate);
+                } else {
+                  handleEndDateChange(selectedDate);
+                }
+              }
+            }}
+          />
+        </View>
       )}
     </View>
   );
@@ -483,6 +554,50 @@ const styles = StyleSheet.create({
   },
   continueArrow: {
     fontSize: 18,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    paddingBottom: 34,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    minHeight: 320,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  pickerContainer: {
+    width: '100%',
+    minHeight: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerContainerIOS: {
+    height: 320,
+    minHeight: 320,
+  },
+  modalConfirmButton: {
+    width: '100%',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  modalConfirmText: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
   },
 });
