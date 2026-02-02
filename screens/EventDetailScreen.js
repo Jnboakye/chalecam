@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { doc, getDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc, deleteDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -98,6 +98,69 @@ const EventDetailScreen = ({ route, navigation }) => {
     Alert.alert('Event Code', `Share this code: ${event.eventCode}`, [{ text: 'OK' }]);
   };
 
+  const toDate = (v) => {
+    if (!v) return null;
+    return v.toDate ? v.toDate() : new Date(v);
+  };
+
+  const handleEdit = () => {
+    const eventData = {
+      name: event.name,
+      startDate: toDate(event.startTime) || new Date(),
+      endDate: toDate(event.endTime) || new Date(Date.now() + 3600000),
+      coverImage: event.coverImageUrl || null,
+      coverImageUrl: event.coverImageUrl || null,
+      revealPhotos: event.revealPhotos || 'during',
+      revealAfter: event.revealAfter || null,
+      customRevealDate: event.customRevealDate ? toDate(event.customRevealDate) : null,
+      maxGuests: event.maxGuests ?? 7,
+      photosPerGuest: event.maxCameraRollUploads === -1 ? 5 : (event.maxCameraRollUploads ?? 5),
+      unlimitedPhotos: event.unlimitedPhotos ?? false,
+    };
+    navigation.navigate('EventName', { eventId, eventData });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete event',
+      'Are you sure you want to delete this event? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const eventRef = doc(db, 'events', eventId);
+              await deleteDoc(eventRef);
+
+              const ownerRef = doc(db, 'users', event.ownerId);
+              await updateDoc(ownerRef, { eventsCreated: arrayRemove(eventId) });
+
+              const participants = event.participants || [];
+              for (const uid of participants) {
+                if (uid === event.ownerId) continue;
+                try {
+                  const userRef = doc(db, 'users', uid);
+                  await updateDoc(userRef, { eventsJoined: arrayRemove(eventId) });
+                } catch (e) {
+                  console.warn('Could not update participant', uid, e);
+                }
+              }
+
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainTabs' }],
+              });
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete event: ' + error.message);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
@@ -130,6 +193,11 @@ const EventDetailScreen = ({ route, navigation }) => {
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
           {event.name}
         </Text>
+        {isOwner && (
+          <TouchableOpacity style={styles.headerEditButton} onPress={handleEdit}>
+            <Text style={[styles.headerEditText, { color: colors.primary }]}>Edit</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -260,6 +328,16 @@ const EventDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Delete event (owner only) */}
+        {isOwner && (
+          <TouchableOpacity
+            style={[styles.deleteButton, { borderColor: colors.error }]}
+            onPress={handleDelete}
+          >
+            <Text style={[styles.deleteButtonText, { color: colors.error }]}>Delete event</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -298,6 +376,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
+  },
+  headerEditButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  headerEditText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   scroll: {
     flex: 1,
@@ -420,6 +506,17 @@ const styles = StyleSheet.create({
   },
   viewPhotosButton: {
     paddingVertical: 16,
+  },
+  deleteButton: {
+    marginTop: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -23,7 +23,7 @@ const END_DATE_INFO_MESSAGE =
   'This is when your event ends. After this time, guests can no longer upload new photos to this event. Make sure the end time gives everyone enough time to share their photos.';
 
 const TimelineScreen = ({ navigation, route }) => {
-  const { eventData = {}, onNext } = route.params || {};
+  const { eventData = {}, eventId, onNext } = route.params || {};
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [startDate, setStartDate] = useState(
@@ -279,6 +279,7 @@ const TimelineScreen = ({ navigation, route }) => {
     } else {
       navigation.navigate('Guests', {
         eventData: { ...eventData, ...payload },
+        ...(eventId != null && { eventId }),
       });
     }
   };

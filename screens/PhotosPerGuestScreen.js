@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 
 const PhotosPerGuestScreen = ({ navigation, route }) => {
-  const { eventData = {}, onNext } = route.params || {};
+  const { eventData = {}, eventId, onNext } = route.params || {};
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [photosPerGuest, setPhotosPerGuest] = useState(
@@ -36,6 +36,7 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
           photosPerGuest: unlimited ? -1 : photosPerGuest,
           unlimitedPhotos: unlimited,
         },
+        ...(eventId != null && { eventId }),
       });
     }
   };

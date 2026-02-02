@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 
 const EventNameScreen = ({ navigation, route }) => {
-  const { eventData = {}, onNext } = route.params || {};
+  const { eventData = {}, eventId, onNext } = route.params || {};
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [eventName, setEventName] = useState(eventData.name || '');
@@ -32,6 +32,7 @@ const EventNameScreen = ({ navigation, route }) => {
     } else {
       navigation.navigate('CoverImage', {
         eventData: { ...eventData, name: eventName.trim() },
+        ...(eventId != null && { eventId }),
       });
     }
   };

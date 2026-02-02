@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 
 const GuestsScreen = ({ navigation, route }) => {
-  const { eventData = {}, onNext } = route.params || {};
+  const { eventData = {}, eventId, onNext } = route.params || {};
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [maxGuests, setMaxGuests] = useState(eventData.maxGuests || 7);
@@ -23,6 +23,7 @@ const GuestsScreen = ({ navigation, route }) => {
     } else {
       navigation.navigate('PhotosPerGuest', {
         eventData: { ...eventData, maxGuests },
+        ...(eventId != null && { eventId }),
       });
     }
   };

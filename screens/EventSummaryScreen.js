@@ -18,7 +18,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { generate6DigitCode } from '../utils/helpers';
 
 const EventSummaryScreen = ({ navigation, route }) => {
-  const { eventData = {} } = route.params || {};
+  const { eventData = {}, eventId } = route.params || {};
+  const isEditing = eventId != null;
   const { user } = useAuth();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -81,62 +82,100 @@ const EventSummaryScreen = ({ navigation, route }) => {
 
     try {
       let coverImageUrl = null;
-      if (eventData.coverImage) {
-        coverImageUrl = await uploadCoverImage(eventData.coverImage);
+      const coverValue = eventData.coverImage || eventData.coverImageUrl;
+      if (coverValue && (typeof coverValue === 'string' && !coverValue.startsWith('http'))) {
+        coverImageUrl = await uploadCoverImage(coverValue);
+      } else if (coverValue) {
+        coverImageUrl = coverValue;
       }
 
-      const eventCode = generate6DigitCode();
-      const eventDataToSave = {
-        name: eventData.name,
-        ownerId: user.uid,
-        ownerName: user.displayName || user.email,
-        startTime: eventData.startDate || new Date(),
-        endTime: eventData.endDate || new Date(Date.now() + 3600000),
-        showPhotosRealtime: eventData.revealPhotos === 'during',
-        revealPhotos: eventData.revealPhotos || 'during',
-        ...(eventData.revealPhotos === 'after' && {
-          revealAfter: eventData.revealAfter || null,
-          customRevealDate: eventData.revealAfter === 'custom' ? (eventData.customRevealDate || null) : null,
-        }),
-        maxGuests: eventData.maxGuests || 7,
-        maxCameraRollUploads: eventData.unlimitedPhotos ? -1 : (eventData.photosPerGuest || 5),
-        unlimitedPhotos: eventData.unlimitedPhotos || false,
-        coverImageUrl,
-        participants: [user.uid],
-        pendingApprovals: [],
-        eventCode,
-        createdAt: serverTimestamp(),
-        status: 'upcoming',
-        totalPhotos: 0,
-      };
+      if (isEditing) {
+        const eventRef = doc(db, 'events', eventId);
+        const updateData = {
+          name: eventData.name,
+          ownerName: user.displayName || user.email,
+          startTime: eventData.startDate || new Date(),
+          endTime: eventData.endDate || new Date(Date.now() + 3600000),
+          showPhotosRealtime: eventData.revealPhotos === 'during',
+          revealPhotos: eventData.revealPhotos || 'during',
+          ...(eventData.revealPhotos === 'after' && {
+            revealAfter: eventData.revealAfter || null,
+            customRevealDate: eventData.revealAfter === 'custom' ? (eventData.customRevealDate || null) : null,
+          }),
+          maxGuests: eventData.maxGuests || 7,
+          maxCameraRollUploads: eventData.unlimitedPhotos ? -1 : (eventData.photosPerGuest || 5),
+          unlimitedPhotos: eventData.unlimitedPhotos || false,
+          coverImageUrl: coverImageUrl ?? null,
+        };
+        await updateDoc(eventRef, updateData);
 
-      const eventRef = await addDoc(collection(db, 'events'), eventDataToSave);
-
-      // Update user's eventsCreated array
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        eventsCreated: arrayUnion(eventRef.id),
-      });
-
-      setLoading(false);
-      Alert.alert('Success', 'Event created successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Reset navigation stack and navigate to event detail
-            navigation.reset({
-              index: 1,
-              routes: [
-                { name: 'MainTabs' },
-                { name: 'EventDetail', params: { eventId: eventRef.id } },
-              ],
-            });
+        setLoading(false);
+        Alert.alert('Success', 'Event updated successfully!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.reset({
+                index: 1,
+                routes: [
+                  { name: 'MainTabs' },
+                  { name: 'EventDetail', params: { eventId } },
+                ],
+              });
+            },
           },
-        },
-      ]);
+        ]);
+      } else {
+        const eventCode = generate6DigitCode();
+        const eventDataToSave = {
+          name: eventData.name,
+          ownerId: user.uid,
+          ownerName: user.displayName || user.email,
+          startTime: eventData.startDate || new Date(),
+          endTime: eventData.endDate || new Date(Date.now() + 3600000),
+          showPhotosRealtime: eventData.revealPhotos === 'during',
+          revealPhotos: eventData.revealPhotos || 'during',
+          ...(eventData.revealPhotos === 'after' && {
+            revealAfter: eventData.revealAfter || null,
+            customRevealDate: eventData.revealAfter === 'custom' ? (eventData.customRevealDate || null) : null,
+          }),
+          maxGuests: eventData.maxGuests || 7,
+          maxCameraRollUploads: eventData.unlimitedPhotos ? -1 : (eventData.photosPerGuest || 5),
+          unlimitedPhotos: eventData.unlimitedPhotos || false,
+          coverImageUrl,
+          participants: [user.uid],
+          pendingApprovals: [],
+          eventCode,
+          createdAt: serverTimestamp(),
+          status: 'upcoming',
+          totalPhotos: 0,
+        };
+
+        const eventRef = await addDoc(collection(db, 'events'), eventDataToSave);
+
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          eventsCreated: arrayUnion(eventRef.id),
+        });
+
+        setLoading(false);
+        Alert.alert('Success', 'Event created successfully!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              navigation.reset({
+                index: 1,
+                routes: [
+                  { name: 'MainTabs' },
+                  { name: 'EventDetail', params: { eventId: eventRef.id } },
+                ],
+              });
+            },
+          },
+        ]);
+      }
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', 'Failed to create event: ' + error.message);
+      Alert.alert('Error', isEditing ? 'Failed to update event: ' + error.message : 'Failed to create event: ' + error.message);
     }
   };
 
@@ -157,7 +196,7 @@ const EventSummaryScreen = ({ navigation, route }) => {
             <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.text }]}>Event Preview</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{isEditing ? 'Edit event' : 'Event Preview'}</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -201,7 +240,7 @@ const EventSummaryScreen = ({ navigation, route }) => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.saveButtonText}>Save event</Text>
+          <Text style={styles.saveButtonText}>{isEditing ? 'Save changes' : 'Save event'}</Text>
         )}
       </TouchableOpacity>
     </View>

@@ -17,7 +17,7 @@ const PHONE_PREVIEW_WIDTH = Math.min(SCREEN_WIDTH - 48, 220);
 const PHONE_PREVIEW_ASPECT = 9 / 16;
 
 const CoverImageScreen = ({ navigation, route }) => {
-  const { eventData = {}, onNext } = route.params || {};
+  const { eventData = {}, eventId, onNext } = route.params || {};
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [coverImage, setCoverImage] = useState(eventData.coverImage || null);
@@ -49,6 +49,7 @@ const CoverImageScreen = ({ navigation, route }) => {
     } else {
       navigation.navigate('Timeline', {
         eventData: { ...eventData, coverImage },
+        ...(eventId != null && { eventId }),
       });
     }
   };
