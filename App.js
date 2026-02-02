@@ -249,7 +249,7 @@ function MainStack() {
       <Stack.Screen
         name="EventDetail"
         component={EventDetailScreen}
-        options={{ title: 'Event Details' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="EventGallery"

@@ -35,9 +35,14 @@ const TimelineScreen = ({ navigation, route }) => {
   const [revealPhotos, setRevealPhotos] = useState(
     eventData.revealPhotos || null
   );
+  const [revealAfter, setRevealAfter] = useState(eventData.revealAfter || null);
+  const [customRevealDate, setCustomRevealDate] = useState(
+    eventData.customRevealDate ? new Date(eventData.customRevealDate) : null
+  );
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  
+  const [showRevealDatePicker, setShowRevealDatePicker] = useState(false);
+
   // Track which sections should be visible
   const [startDateSelected, setStartDateSelected] = useState(false);
   const [endDateSelected, setEndDateSelected] = useState(false);
@@ -50,6 +55,23 @@ const TimelineScreen = ({ navigation, route }) => {
   const revealTranslateY = useRef(new Animated.Value(30)).current;
   const continueOpacity = useRef(new Animated.Value(0)).current;
   const continueTranslateY = useRef(new Animated.Value(30)).current;
+
+  const now = new Date();
+
+  useEffect(() => {
+    // Clamp initial dates so they're valid: start >= now, end >= start, reveal >= end
+    const initialStart = eventData.startDate ? (eventData.startDate instanceof Date ? eventData.startDate : new Date(eventData.startDate)) : new Date();
+    const initialEnd = eventData.endDate ? (eventData.endDate instanceof Date ? eventData.endDate : new Date(eventData.endDate)) : new Date(Date.now() + 3600000);
+    const initialReveal = eventData.customRevealDate ? (eventData.customRevealDate instanceof Date ? eventData.customRevealDate : new Date(eventData.customRevealDate)) : null;
+
+    const clampedStart = initialStart.getTime() < now.getTime() ? new Date(now.getTime()) : initialStart;
+    const clampedEnd = initialEnd.getTime() < clampedStart.getTime() ? new Date(clampedStart.getTime() + 3600000) : initialEnd;
+    const clampedReveal = initialReveal && initialReveal.getTime() < clampedEnd.getTime() ? new Date(clampedEnd.getTime() + 86400000) : initialReveal;
+
+    setStartDate(clampedStart);
+    setEndDate(clampedEnd);
+    if (initialReveal) setCustomRevealDate(clampedReveal);
+  }, []);
 
   useEffect(() => {
     // If we have existing data, show all sections
@@ -115,8 +137,15 @@ const TimelineScreen = ({ navigation, route }) => {
 
   const handleStartDateChange = (selectedDate) => {
     if (selectedDate) {
-      setStartDate(selectedDate);
+      const clampedStart = selectedDate.getTime() < now.getTime() ? now : selectedDate;
+      setStartDate(clampedStart);
       setStartDateSelected(true);
+      // If end is now before start, move end to start + 1 hour
+      setEndDate((prev) =>
+        prev.getTime() <= clampedStart.getTime()
+          ? new Date(clampedStart.getTime() + 3600000)
+          : prev
+      );
       // Animate end date in
       setTimeout(() => {
         Animated.parallel([
@@ -138,8 +167,19 @@ const TimelineScreen = ({ navigation, route }) => {
 
   const handleEndDateChange = (selectedDate) => {
     if (selectedDate) {
-      setEndDate(selectedDate);
+      const clampedEnd =
+        selectedDate.getTime() < startDate.getTime()
+          ? new Date(startDate.getTime() + 3600000)
+          : selectedDate;
+      setEndDate(clampedEnd);
       setEndDateSelected(true);
+      // If custom reveal is set and now before new end, move it to end + 24h
+      setCustomRevealDate((prev) => {
+        if (!prev) return prev;
+        return prev.getTime() < clampedEnd.getTime()
+          ? new Date(clampedEnd.getTime() + 86400000)
+          : prev;
+      });
       // Animate reveal photos in
       setTimeout(() => {
         Animated.parallel([
@@ -161,8 +201,52 @@ const TimelineScreen = ({ navigation, route }) => {
 
   const handleRevealChange = (value) => {
     setRevealPhotos(value);
-    setRevealSelected(true);
-    // Animate continue button in
+    if (value === 'during') {
+      setRevealAfter(null);
+      setCustomRevealDate(null);
+      setRevealSelected(true);
+      animateContinue();
+    } else {
+      setRevealSelected(false);
+      setRevealAfter(null);
+      setCustomRevealDate(null);
+    }
+  };
+
+  const handleRevealAfterChange = (value) => {
+    setRevealAfter(value);
+    if (value === 'custom') {
+      setShowRevealDatePicker(true);
+      if (!customRevealDate) {
+        const defaultReveal = new Date(endDate);
+        defaultReveal.setHours(defaultReveal.getHours() + 24);
+        setCustomRevealDate(defaultReveal);
+      }
+    } else {
+      setRevealSelected(true);
+      animateContinue();
+    }
+  };
+
+  const handleCustomRevealDateChange = (selectedDate) => {
+    if (selectedDate) {
+      const clamped =
+        selectedDate.getTime() < endDate.getTime()
+          ? new Date(endDate.getTime() + 3600000)
+          : selectedDate;
+      setCustomRevealDate(clamped);
+    }
+  };
+
+  const confirmCustomRevealDate = () => {
+    setShowRevealDatePicker(false);
+    if (customRevealDate) {
+      setRevealSelected(true);
+      animateContinue();
+    }
+  };
+
+  const animateContinue = () => {
     setTimeout(() => {
       Animated.parallel([
         Animated.timing(continueOpacity, {
@@ -181,19 +265,33 @@ const TimelineScreen = ({ navigation, route }) => {
   };
 
   const handleContinue = () => {
+    const payload = {
+      startDate,
+      endDate,
+      revealPhotos: revealPhotos || 'during',
+      ...(revealPhotos === 'after' && {
+        revealAfter: revealAfter || null,
+        customRevealDate: revealAfter === 'custom' ? customRevealDate : null,
+      }),
+    };
     if (onNext) {
-      onNext({ startDate, endDate, revealPhotos: revealPhotos || 'during' });
+      onNext(payload);
     } else {
       navigation.navigate('Guests', {
-        eventData: { ...eventData, startDate, endDate, revealPhotos: revealPhotos || 'during' },
+        eventData: { ...eventData, ...payload },
       });
     }
   };
 
   const revealOptions = [
-    { value: 'after', label: 'After event' },
     { value: 'during', label: 'During event' },
-    { value: 'hidden', label: 'Hidden' },
+    { value: 'after', label: 'After event' },
+  ];
+
+  const revealAfterOptions = [
+    { value: '12h', label: '12 hours' },
+    { value: '24h', label: '24 hours' },
+    { value: 'custom', label: 'Custom' },
   ];
 
   // Animated styles using React Native Animated API
@@ -333,11 +431,125 @@ const TimelineScreen = ({ navigation, route }) => {
             ))}
           </View>
           <Text style={[styles.revealDescription, { color: colors.textSecondary }]}>
-            Guests can view the album during- and after the event.
+            {revealPhotos === 'during'
+              ? 'Photos are visible in real time during the event.'
+              : 'Choose when to reveal photos after the event ends.'}
           </Text>
+
+          {revealPhotos === 'after' && (
+            <View style={styles.revealAfterSection}>
+              <Text style={[styles.revealAfterLabel, { color: colors.textSecondary }]}>
+                Reveal photos
+              </Text>
+              <View style={styles.revealAfterRow}>
+                {revealAfterOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.revealAfterOption,
+                      { backgroundColor: colors.card, borderColor: colors.border },
+                      revealAfter === option.value && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    ]}
+                    onPress={() => {
+                      if (option.value === 'custom') {
+                        handleRevealAfterChange('custom');
+                      } else {
+                        handleRevealAfterChange(option.value);
+                      }
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.revealOptionText,
+                        { color: colors.text },
+                        revealAfter === option.value && { color: '#fff', fontWeight: '600' },
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {revealAfter === 'custom' && (
+                <TouchableOpacity
+                  style={[
+                    styles.customRevealDateButton,
+                    { backgroundColor: colors.card, borderColor: colors.border },
+                  ]}
+                  onPress={() => setShowRevealDatePicker(true)}
+                >
+                  <Text style={[styles.dateText, { color: colors.text }]}>
+                    {customRevealDate ? formatDateTime(customRevealDate) : 'Choose date & time'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
           </Animated.View>
         )}
       </ScrollView>
+
+      {/* Custom reveal date/time picker modal */}
+      {Platform.OS === 'ios' && showRevealDatePicker && (
+        <Modal
+          visible
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowRevealDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={() => setShowRevealDatePicker(false)}
+            />
+            <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                Reveal date & time
+              </Text>
+              <View style={[styles.pickerContainer, Platform.OS === 'ios' && styles.pickerContainerIOS]}>
+                <DateTimePicker
+                  value={customRevealDate || new Date(endDate.getTime() + 86400000)}
+                  mode="datetime"
+                  minimumDate={endDate}
+                  is24Hour={false}
+                  display={Platform.OS === 'ios' ? 'inline' : 'spinner'}
+                  themeVariant={colors.isDark ? 'dark' : 'light'}
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) handleCustomRevealDateChange(selectedDate);
+                  }}
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.modalConfirmButton, { backgroundColor: colors.primary }]}
+                onPress={confirmCustomRevealDate}
+              >
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {Platform.OS === 'android' && showRevealDatePicker && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <DateTimePicker
+            value={customRevealDate || new Date(endDate.getTime() + 86400000)}
+            mode="datetime"
+            minimumDate={endDate}
+            is24Hour={false}
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowRevealDatePicker(false);
+              if (selectedDate) {
+                handleCustomRevealDateChange(selectedDate);
+                setRevealSelected(true);
+                animateContinue();
+              }
+            }}
+          />
+        </View>
+      )}
 
       {/* Continue Button - Animated In */}
       {revealSelected && (
@@ -380,6 +592,7 @@ const TimelineScreen = ({ navigation, route }) => {
                 <DateTimePicker
                   value={showStartPicker ? startDate : endDate}
                   mode="datetime"
+                  minimumDate={showStartPicker ? now : startDate}
                   is24Hour={false}
                   display={Platform.OS === 'ios' ? 'inline' : 'spinner'}
                   themeVariant={colors.isDark ? 'dark' : 'light'}
@@ -414,6 +627,7 @@ const TimelineScreen = ({ navigation, route }) => {
           <DateTimePicker
             value={showStartPicker ? startDate : endDate}
             mode="datetime"
+            minimumDate={showStartPicker ? now : startDate}
             is24Hour={false}
             display="default"
             onChange={(event, selectedDate) => {
@@ -535,6 +749,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
   },
+  revealAfterSection: {
+    marginTop: 20,
+  },
+  revealAfterLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  revealAfterRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  revealAfterOption: {
+    flex: 1,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  customRevealDateButton: {
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+  },
   continueButton: {
     borderRadius: 12,
     padding: 16,
@@ -591,13 +829,13 @@ const styles = StyleSheet.create({
   modalConfirmButton: {
     width: '100%',
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 28,
   },
   modalConfirmText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

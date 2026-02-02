@@ -6,16 +6,21 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { doc, getDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import QRCode from 'react-native-qrcode-svg';
 import { formatDate, getEventStatus } from '../utils/helpers';
 
 const EventDetailScreen = ({ route, navigation }) => {
   const { eventId } = route.params;
   const { user } = useAuth();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -29,7 +34,6 @@ const EventDetailScreen = ({ route, navigation }) => {
         const eventData = { id: docSnap.id, ...docSnap.data() };
         setEvent(eventData);
 
-        // Fetch pending user details
         if (eventData.pendingApprovals && eventData.pendingApprovals.length > 0) {
           const userPromises = eventData.pendingApprovals.map(async (userId) => {
             const userDoc = await getDoc(doc(db, 'users', userId));
@@ -64,7 +68,6 @@ const EventDetailScreen = ({ route, navigation }) => {
         pendingApprovals: arrayRemove(userId),
       });
 
-      // Update user's eventsJoined array
       const userRef = doc(db, 'users', userId);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
@@ -97,8 +100,8 @@ const EventDetailScreen = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#6200EA" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -108,113 +111,316 @@ const EventDetailScreen = ({ route, navigation }) => {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-100">
-      {/* Event Info Card */}
-      <View className="bg-white m-4 p-4 rounded-xl shadow-sm">
-        <Text className="text-2xl font-bold text-gray-800 mb-2">{event.name}</Text>
-        <Text className="text-sm text-gray-600 mb-4">Created by {event.ownerName}</Text>
-        
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-sm text-gray-600 font-medium">Start:</Text>
-          <Text className="text-sm text-gray-800">{formatDate(event.startTime)}</Text>
-        </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-sm text-gray-600 font-medium">End:</Text>
-          <Text className="text-sm text-gray-800">{formatDate(event.endTime)}</Text>
-        </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-sm text-gray-600 font-medium">Status:</Text>
-          <Text className={`text-sm ${status === 'active' ? 'text-green-600' : 'text-gray-600'}`}>
-            {status?.toUpperCase()}
-          </Text>
-        </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-sm text-gray-600 font-medium">Participants:</Text>
-          <Text className="text-sm text-gray-800">{event.participants?.length || 0}</Text>
-        </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-sm text-gray-600 font-medium">Photos:</Text>
-          <Text className="text-sm text-gray-800">{event.totalPhotos || 0}</Text>
-        </View>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('MainTabs');
+            }
+          }}
+        >
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
+          </View>
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+          {event.name}
+        </Text>
       </View>
 
-      {/* QR Code (Owner only) */}
-      {isOwner && (
-        <View className="bg-white m-4 p-4 rounded-xl shadow-sm">
-          <Text className="text-lg font-semibold text-gray-800 mb-4">QR Code</Text>
-          <View className="items-center my-4">
-            <QRCode value={eventId} size={200} />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Event info card */}
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.eventName, { color: colors.text }]}>{event.name}</Text>
+          <Text style={[styles.ownerText, { color: colors.textSecondary }]}>
+            Created by {event.ownerName}
+          </Text>
+
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>Start</Text>
+            <Text style={[styles.rowValue, { color: colors.text }]}>{formatDate(event.startTime)}</Text>
           </View>
-          <TouchableOpacity className="bg-primary rounded-lg p-3 items-center mt-2" onPress={handleShareCode}>
-            <Text className="text-white text-base font-semibold">Share Event Code</Text>
-          </TouchableOpacity>
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>End</Text>
+            <Text style={[styles.rowValue, { color: colors.text }]}>{formatDate(event.endTime)}</Text>
+          </View>
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>Status</Text>
+            <Text
+              style={[
+                styles.rowValue,
+                styles.statusText,
+                { color: status === 'active' ? colors.success : colors.text },
+              ]}
+            >
+              {status?.toUpperCase()}
+            </Text>
+          </View>
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>Participants</Text>
+            <Text style={[styles.rowValue, { color: colors.text }]}>
+              {event.participants?.length || 0}
+            </Text>
+          </View>
+          <View style={[styles.rowLast, { borderBottomColor: 'transparent' }]}>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>Photos</Text>
+            <Text style={[styles.rowValue, { color: colors.text }]}>{event.totalPhotos || 0}</Text>
+          </View>
         </View>
-      )}
 
-      {/* Pending Approvals (Owner only) */}
-      {isOwner && event.requireApproval && pendingUsers.length > 0 && (
-        <View className="bg-white m-4 p-4 rounded-xl shadow-sm">
-          <Text className="text-lg font-semibold text-gray-800 mb-4">Pending Approvals</Text>
-          {pendingUsers.map((pendingUser) => (
-            <View key={pendingUser.uid} className="flex-row justify-between items-center py-3 border-b border-gray-200">
-              <View className="flex-1">
-                <Text className="text-base font-medium text-gray-800">
-                  {pendingUser.displayName || pendingUser.email}
+        {/* QR code (owner only) */}
+        {isOwner && (
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>QR Code</Text>
+            <View style={styles.qrWrap}>
+              <View style={styles.qrBackground}>
+                <QRCode value={eventId} size={200} backgroundColor="#fff" color="#0f172a" />
+              </View>
+            </View>
+            <TouchableOpacity
+              style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+              onPress={handleShareCode}
+            >
+              <Text style={styles.primaryButtonText}>Share event code</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Pending approvals (owner only) */}
+        {isOwner && event.requireApproval && pendingUsers.length > 0 && (
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Pending approvals</Text>
+            {pendingUsers.map((pendingUser) => (
+              <View
+                key={pendingUser.uid}
+                style={[styles.pendingRow, { borderBottomColor: colors.border }]}
+              >
+                <View style={styles.pendingInfo}>
+                  <Text style={[styles.pendingName, { color: colors.text }]}>
+                    {pendingUser.displayName || pendingUser.email}
+                  </Text>
+                  <Text style={[styles.pendingEmail, { color: colors.textSecondary }]}>
+                    {pendingUser.email}
+                  </Text>
+                </View>
+                <View style={styles.pendingActions}>
+                  <TouchableOpacity
+                    style={[styles.approveButton, { backgroundColor: colors.success }]}
+                    onPress={() => handleApprove(pendingUser.uid)}
+                  >
+                    <Text style={styles.actionButtonText}>Approve</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.rejectButton, { backgroundColor: colors.error }]}
+                    onPress={() => handleReject(pendingUser.uid)}
+                  >
+                    <Text style={styles.actionButtonText}>Reject</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Participant status (non-owner) */}
+        {!isOwner && (
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            {isPending ? (
+              <View style={[styles.statusBanner, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.statusBannerText, { color: colors.text }]}>
+                  Waiting for approval from event owner
                 </Text>
-                <Text className="text-xs text-gray-600 mt-1">{pendingUser.email}</Text>
               </View>
-              <View className="flex-row gap-2">
-                <TouchableOpacity
-                  className="bg-green-600 px-4 py-2 rounded-md"
-                  onPress={() => handleApprove(pendingUser.uid)}
-                >
-                  <Text className="text-white text-sm font-semibold">Approve</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-red-500 px-4 py-2 rounded-md"
-                  onPress={() => handleReject(pendingUser.uid)}
-                >
-                  <Text className="text-white text-sm font-semibold">Reject</Text>
-                </TouchableOpacity>
+            ) : isParticipant ? (
+              <View style={[styles.statusBanner, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.statusBannerText, { color: colors.success }]}>
+                  You are a participant
+                </Text>
               </View>
-            </View>
-          ))}
-        </View>
-      )}
+            ) : null}
+          </View>
+        )}
 
-      {/* Participant Status */}
-      {!isOwner && (
-        <View className="bg-white m-4 p-4 rounded-xl shadow-sm">
-          {isPending ? (
-            <View className="bg-yellow-100 p-3 rounded-lg border border-yellow-400">
-              <Text className="text-sm text-yellow-800 text-center">
-                ⏳ Waiting for approval from event owner
-              </Text>
-            </View>
-          ) : isParticipant ? (
-            <View className="bg-yellow-100 p-3 rounded-lg border border-yellow-400">
-              <Text className="text-sm text-green-600 text-center">
-                ✅ You are a participant
-              </Text>
-            </View>
-          ) : null}
-        </View>
-      )}
-
-      {/* View Photos Button */}
-      {(isOwner || (isParticipant && !isPending)) && (
-        <View className="bg-white m-4 p-4 rounded-xl shadow-sm">
-          <TouchableOpacity
-            className="bg-primary rounded-lg p-4 items-center"
-            onPress={() => navigation.navigate('EventGallery', { eventId: event.id })}
-          >
-            <Text className="text-white text-base font-semibold">View Photos</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+        {/* View photos */}
+        {(isOwner || (isParticipant && !isPending)) && (
+          <View style={styles.bottomCard}>
+            <TouchableOpacity
+              style={[styles.primaryButton, styles.viewPhotosButton, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('EventGallery', { eventId: event.id })}
+            >
+              <Text style={styles.primaryButtonText}>View photos</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
-export default EventDetailScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  backButtonCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backArrow: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+  },
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  eventName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  ownerText: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  rowLast: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  rowLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  rowValue: {
+    fontSize: 14,
+  },
+  statusText: {
+    fontWeight: '600',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  qrWrap: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  qrBackground: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  primaryButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pendingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  pendingInfo: {
+    flex: 1,
+  },
+  pendingName: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  pendingEmail: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  pendingActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  approveButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  rejectButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  statusBanner: {
+    padding: 16,
+    borderRadius: 12,
+  },
+  statusBannerText: {
+    fontSize: 15,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  bottomCard: {
+    marginBottom: 16,
+  },
+  viewPhotosButton: {
+    paddingVertical: 16,
+  },
+});
 
+export default EventDetailScreen;

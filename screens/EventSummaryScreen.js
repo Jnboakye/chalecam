@@ -35,17 +35,19 @@ const EventSummaryScreen = ({ navigation, route }) => {
     });
   };
 
-  const getRevealText = (reveal) => {
-    switch (reveal) {
-      case 'during':
-        return 'Open during event';
-      case 'after':
-        return 'After event';
-      case 'hidden':
-        return 'Hidden';
-      default:
-        return 'Open during event';
+  const getRevealText = () => {
+    const reveal = eventData.revealPhotos || 'during';
+    if (reveal === 'during') return 'During event (real time)';
+    if (reveal === 'after') {
+      const after = eventData.revealAfter;
+      if (after === '12h') return '12 hours after event';
+      if (after === '24h') return '24 hours after event';
+      if (after === 'custom' && eventData.customRevealDate) {
+        return `Custom: ${formatDate(eventData.customRevealDate instanceof Date ? eventData.customRevealDate : new Date(eventData.customRevealDate))}`;
+      }
+      return 'After event';
     }
+    return 'During event (real time)';
   };
 
   const getPhotosText = () => {
@@ -92,6 +94,10 @@ const EventSummaryScreen = ({ navigation, route }) => {
         endTime: eventData.endDate || new Date(Date.now() + 3600000),
         showPhotosRealtime: eventData.revealPhotos === 'during',
         revealPhotos: eventData.revealPhotos || 'during',
+        ...(eventData.revealPhotos === 'after' && {
+          revealAfter: eventData.revealAfter || null,
+          customRevealDate: eventData.revealAfter === 'custom' ? (eventData.customRevealDate || null) : null,
+        }),
         maxGuests: eventData.maxGuests || 7,
         maxCameraRollUploads: eventData.unlimitedPhotos ? -1 : (eventData.photosPerGuest || 5),
         unlimitedPhotos: eventData.unlimitedPhotos || false,
@@ -175,7 +181,7 @@ const EventSummaryScreen = ({ navigation, route }) => {
           <DetailRow label="End date" value={formatDate(eventData.endDate)} colors={colors} />
           <DetailRow
             label="Album reveal"
-            value={getRevealText(eventData.revealPhotos)}
+            value={getRevealText()}
             colors={colors}
           />
           <DetailRow label="Guests" value={`Max ${eventData.maxGuests || 7} guests`} colors={colors} />
