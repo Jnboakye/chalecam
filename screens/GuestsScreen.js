@@ -6,11 +6,13 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 
 const GuestsScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [maxGuests, setMaxGuests] = useState(eventData.maxGuests || 7);
 
   const guestOptions = [7, 25, 50, 100, 150, 200, 250, 500];
@@ -36,8 +38,8 @@ const GuestsScreen = ({ navigation, route }) => {
   ];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
@@ -48,20 +50,20 @@ const GuestsScreen = ({ navigation, route }) => {
             }
           }}
         >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backArrow}>←</Text>
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.title}>Guests</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Guests</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.instructionText}>
+        <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
           Select the amount of guests you expect. You can preview the event before any payment. After the payment, the event will be confirmed.
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Maximum amount of guests</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Maximum amount of guests</Text>
           <View style={styles.guestOptionsContainer}>
             {guestOptions.map((count) => (
               <TouchableOpacity
@@ -77,7 +79,7 @@ const GuestsScreen = ({ navigation, route }) => {
                   style={[
                     styles.guestOptionText,
                     { color: colors.text },
-                    maxGuests === count && styles.guestOptionTextActive,
+                    maxGuests === count && { color: '#fff', fontWeight: '600' },
                   ]}
                 >
                   {count}
@@ -85,14 +87,14 @@ const GuestsScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.contactText}>
+          <Text style={[styles.contactText, { color: colors.textSecondary }]}>
             Need more guests? Please contact us{' '}
-            <Text style={styles.contactLink}>→</Text>
+            <Text style={[styles.contactLink, { color: colors.primary }]}>→</Text>
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>This plan includes:</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>This plan includes:</Text>
           <View style={styles.featuresContainer}>
             {planFeatures.map((feature, index) => (
               <View key={index} style={styles.featureRow}>
@@ -121,12 +123,10 @@ const GuestsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -137,19 +137,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backArrow: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     flex: 1,
   },
   content: {
@@ -160,7 +157,6 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: '#fff',
     marginBottom: 32,
     lineHeight: 22,
   },
@@ -170,7 +166,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
     marginBottom: 16,
   },
   guestOptionsContainer: {
@@ -191,18 +186,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  guestOptionTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
   contactText: {
     fontSize: 14,
-    color: '#999',
     marginTop: 8,
   },
-  contactLink: {
-    color: '#9b59b6',
-  },
+  contactLink: {},
   featuresContainer: {
     gap: 12,
   },

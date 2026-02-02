@@ -7,11 +7,13 @@ import {
   ScrollView,
   Switch,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 
 const PhotosPerGuestScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [photosPerGuest, setPhotosPerGuest] = useState(
     eventData.photosPerGuest || 5
   );
@@ -39,8 +41,8 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
@@ -51,15 +53,15 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
             }
           }}
         >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backArrow}>←</Text>
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.title}>Amount of photos</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Amount of photos</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.instructionText}>
+        <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
           Select the maximum amount of photos each guest can take- or upload during the event.
         </Text>
 
@@ -81,7 +83,7 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
                 style={[
                   styles.photoOptionText,
                   { color: colors.text },
-                  !unlimited && photosPerGuest === count && styles.photoOptionTextActive,
+                  !unlimited && photosPerGuest === count && { color: '#fff', fontWeight: '600' },
                 ]}
               >
                 {count} photos
@@ -99,7 +101,7 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
               </View>
             </View>
             <View style={[styles.popularTag, { backgroundColor: colors.warning }]}>
-              <Text style={styles.popularTagText}>POPULAR</Text>
+              <Text style={[styles.popularTagText, { color: colors.isDark ? '#1a1a1a' : '#000' }]}>POPULAR</Text>
             </View>
           </View>
           <Text style={[styles.unlimitedDescription, { color: colors.textSecondary }]}>
@@ -117,7 +119,7 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
                 }
               }}
               trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor="#fff"
+              thumbColor={colors.card}
             />
           </View>
         </View>
@@ -134,12 +136,10 @@ const PhotosPerGuestScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -150,19 +150,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backArrow: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     flex: 1,
   },
   content: {
@@ -173,7 +170,6 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: '#fff',
     marginBottom: 24,
     lineHeight: 22,
   },
@@ -194,10 +190,6 @@ const styles = StyleSheet.create({
   photoOptionText: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  photoOptionTextActive: {
-    color: '#fff',
-    fontWeight: '600',
   },
   unlimitedCard: {
     borderRadius: 16,
@@ -231,13 +223,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   popularTag: {
-    backgroundColor: '#ffc107',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   popularTagText: {
-    color: '#000',
     fontSize: 10,
     fontWeight: 'bold',
   },

@@ -17,7 +17,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chalecam.app"
+      "bundleIdentifier": "com.chalecam.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to your camera to take photos at events.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload photos to events.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs permission to save photos to your photo library."
+      }
     },
     "android": {
       "adaptiveIcon": {

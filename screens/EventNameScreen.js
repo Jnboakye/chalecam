@@ -7,9 +7,13 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../contexts/ThemeContext';
 
 const EventNameScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [eventName, setEventName] = useState(eventData.name || '');
 
   const examples = [
@@ -37,12 +41,11 @@ const EventNameScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
-            // Navigate back to home if we can't go back, otherwise go back normally
             if (navigation.canGoBack()) {
               navigation.goBack();
             } else {
@@ -50,51 +53,58 @@ const EventNameScreen = ({ navigation, route }) => {
             }
           }}
         >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backArrow}>←</Text>
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.title}>Event name</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Event name</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              { backgroundColor: colors.card, color: colors.text, borderColor: colors.border },
+            ]}
             placeholder="Event name"
-            placeholderTextColor="#666"
+            placeholderTextColor={colors.textSecondary}
             value={eventName}
             onChangeText={setEventName}
             autoCapitalize="words"
           />
           <TouchableOpacity style={styles.infoButton}>
-            <View style={styles.infoCircle}>
-              <Text style={styles.infoText}>i</Text>
+            <View style={[styles.infoCircle, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.infoText, { color: colors.text }]}>i</Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.examplesTitle}>Examples</Text>
+        <Text style={[styles.examplesTitle, { color: colors.text }]}>Examples</Text>
         <View style={styles.examplesContainer}>
           {examples.map((example, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.exampleChip}
+              style={[styles.exampleChip, { borderColor: colors.border }]}
               onPress={() => handleExamplePress(example)}
             >
-              <Text style={styles.exampleText}>{example}</Text>
+              <Text style={[styles.exampleText, { color: colors.text }]}>{example}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.continueButton, !eventName.trim() && styles.continueButtonDisabled]}
+        style={[
+          styles.continueButton,
+          { backgroundColor: colors.surface },
+          !eventName.trim() && styles.continueButtonDisabled,
+        ]}
         onPress={handleContinue}
         disabled={!eventName.trim()}
       >
-        <Text style={styles.continueButtonText}>Continue</Text>
-        <Text style={styles.continueArrow}>→</Text>
+        <Text style={[styles.continueButtonText, { color: colors.text }]}>Continue</Text>
+        <Text style={[styles.continueArrow, { color: colors.text }]}>→</Text>
       </TouchableOpacity>
     </View>
   );
@@ -103,12 +113,10 @@ const EventNameScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -119,19 +127,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backArrow: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     flex: 1,
   },
   content: {
@@ -147,14 +152,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#2a2a2a',
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
     fontSize: 16,
     marginRight: 12,
     borderWidth: 1,
-    borderColor: '#333',
   },
   infoButton: {
     width: 32,
@@ -164,19 +166,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   infoText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
   examplesTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
     marginBottom: 16,
   },
   examplesContainer: {
@@ -189,15 +188,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#333',
     backgroundColor: 'transparent',
   },
   exampleText: {
-    color: '#fff',
     fontSize: 14,
   },
   continueButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 12,
     padding: 16,
     margin: 20,
@@ -209,13 +205,11 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   continueButtonText: {
-    color: '#000',
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
   },
   continueArrow: {
-    color: '#000',
     fontSize: 18,
     fontWeight: '600',
   },

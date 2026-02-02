@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, addDoc, serverTimestamp, arrayUnion, updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
@@ -20,6 +21,7 @@ const EventSummaryScreen = ({ navigation, route }) => {
   const { eventData = {} } = route.params || {};
   const { user } = useAuth();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
 
   const formatDate = (date) => {
@@ -133,8 +135,8 @@ const EventSummaryScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
@@ -145,11 +147,11 @@ const EventSummaryScreen = ({ navigation, route }) => {
             }
           }}
         >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backArrow}>←</Text>
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.title}>Event Preview</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Event Preview</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -159,7 +161,7 @@ const EventSummaryScreen = ({ navigation, route }) => {
               source={{ uri: eventData.coverImage }}
               style={styles.coverImage}
             />
-            <View style={styles.coverOverlay}>
+            <View style={[styles.coverOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
               <Text style={styles.eventNameOnCover}>{eventData.name}</Text>
               <Text style={styles.eventDateOnCover}>
                 {formatDate(eventData.startDate)}
@@ -169,19 +171,24 @@ const EventSummaryScreen = ({ navigation, route }) => {
         )}
 
         <View style={styles.detailsContainer}>
-          <DetailRow label="Start date" value={formatDate(eventData.startDate)} />
-          <DetailRow label="End date" value={formatDate(eventData.endDate)} />
+          <DetailRow label="Start date" value={formatDate(eventData.startDate)} colors={colors} />
+          <DetailRow label="End date" value={formatDate(eventData.endDate)} colors={colors} />
           <DetailRow
             label="Album reveal"
             value={getRevealText(eventData.revealPhotos)}
+            colors={colors}
           />
-          <DetailRow label="Guests" value={`Max ${eventData.maxGuests || 7} guests`} />
-          <DetailRow label="Photos per guest" value={getPhotosText()} />
+          <DetailRow label="Guests" value={`Max ${eventData.maxGuests || 7} guests`} colors={colors} />
+          <DetailRow label="Photos per guest" value={getPhotosText()} colors={colors} />
         </View>
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+        style={[
+          styles.saveButton,
+          { backgroundColor: colors.primary },
+          loading && styles.saveButtonDisabled,
+        ]}
         onPress={handleSaveEvent}
         disabled={loading}
       >
@@ -195,12 +202,12 @@ const EventSummaryScreen = ({ navigation, route }) => {
   );
 };
 
-const DetailRow = ({ label, value }) => (
-  <TouchableOpacity style={styles.detailRow}>
-    <Text style={styles.detailLabel}>{label}</Text>
+const DetailRow = ({ label, value, colors }) => (
+  <TouchableOpacity style={[styles.detailRow, { borderBottomColor: colors.border }]}>
+    <Text style={[styles.detailLabel, { color: colors.text }]}>{label}</Text>
     <View style={styles.detailValueContainer}>
-      <Text style={styles.detailValue}>{value}</Text>
-      <Text style={styles.detailArrow}>→</Text>
+      <Text style={[styles.detailValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.detailArrow, { color: colors.textSecondary }]}>→</Text>
     </View>
   </TouchableOpacity>
 );
@@ -208,12 +215,10 @@ const DetailRow = ({ label, value }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -224,19 +229,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backArrow: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     flex: 1,
   },
   content: {
@@ -262,7 +264,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   eventNameOnCover: {
     fontSize: 24,
@@ -283,11 +284,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
   },
   detailLabel: {
     fontSize: 16,
-    color: '#fff',
     fontWeight: '500',
   },
   detailValueContainer: {
@@ -296,12 +295,10 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: 16,
-    color: '#fff',
     marginRight: 8,
   },
   detailArrow: {
     fontSize: 18,
-    color: '#999',
   },
   saveButton: {
     borderRadius: 12,
@@ -315,6 +312,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#fff',
   },
 });
 

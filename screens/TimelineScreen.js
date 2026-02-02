@@ -8,12 +8,14 @@ import {
   Platform,
   Animated,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
 
 const TimelineScreen = ({ navigation, route }) => {
   const { eventData = {}, onNext } = route.params || {};
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [startDate, setStartDate] = useState(
     eventData.startDate || new Date()
   );
@@ -201,8 +203,8 @@ const TimelineScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
@@ -213,11 +215,11 @@ const TimelineScreen = ({ navigation, route }) => {
             }
           }}
         >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backArrow}>←</Text>
+          <View style={[styles.backButtonCircle, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.backArrow, { color: colors.text }]}>←</Text>
           </View>
         </TouchableOpacity>
-        <Text style={styles.title}>Timeline</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Timeline</Text>
       </View>
 
       <ScrollView 
@@ -226,14 +228,14 @@ const TimelineScreen = ({ navigation, route }) => {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <Text style={styles.instructionText}>
+          <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
             Let's set up the timeline of your event.
           </Text>
         </View>
 
         {/* Start Date Section - Always Visible */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Start date</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Start date</Text>
           <View style={styles.fieldRow}>
             <TouchableOpacity
               style={[
@@ -243,11 +245,11 @@ const TimelineScreen = ({ navigation, route }) => {
               ]}
               onPress={() => setShowStartPicker(true)}
             >
-              <Text style={styles.dateText}>{formatDateTime(startDate)}</Text>
+              <Text style={[styles.dateText, { color: colors.text }]}>{formatDateTime(startDate)}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.infoButton}>
-              <View style={styles.infoCircle}>
-                <Text style={styles.infoText}>i</Text>
+              <View style={[styles.infoCircle, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.infoText, { color: colors.text }]}>i</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -273,7 +275,7 @@ const TimelineScreen = ({ navigation, route }) => {
               endDateAnimatedStyle,
             ]}
           >
-          <Text style={styles.fieldLabel}>End date</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>End date</Text>
           <View style={styles.fieldRow}>
             <TouchableOpacity
               style={[
@@ -283,11 +285,11 @@ const TimelineScreen = ({ navigation, route }) => {
               ]}
               onPress={() => setShowEndPicker(true)}
             >
-              <Text style={styles.dateText}>{formatDateTime(endDate)}</Text>
+              <Text style={[styles.dateText, { color: colors.text }]}>{formatDateTime(endDate)}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.infoButton}>
-              <View style={styles.infoCircle}>
-                <Text style={styles.infoText}>i</Text>
+              <View style={[styles.infoCircle, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.infoText, { color: colors.text }]}>i</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -314,7 +316,7 @@ const TimelineScreen = ({ navigation, route }) => {
               revealAnimatedStyle,
             ]}
           >
-          <Text style={styles.fieldLabel}>Reveal photos</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Reveal photos</Text>
           <View style={styles.revealOptionsContainer}>
             {revealOptions.map((option) => (
               <TouchableOpacity
@@ -330,7 +332,7 @@ const TimelineScreen = ({ navigation, route }) => {
                   style={[
                     styles.revealOptionText,
                     { color: colors.text },
-                    revealPhotos === option.value && styles.revealOptionTextActive,
+                    revealPhotos === option.value && { color: '#fff', fontWeight: '600' },
                   ]}
                 >
                   {option.label}
@@ -338,7 +340,7 @@ const TimelineScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.revealDescription}>
+          <Text style={[styles.revealDescription, { color: colors.textSecondary }]}>
             Guests can view the album during- and after the event.
           </Text>
           </Animated.View>
@@ -364,12 +366,10 @@ const TimelineScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -380,19 +380,16 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   backArrow: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     flex: 1,
   },
   content: {
@@ -403,7 +400,6 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: '#fff',
     marginBottom: 24,
     lineHeight: 22,
   },
@@ -412,7 +408,6 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 14,
-    color: '#999',
     marginBottom: 8,
   },
   fieldRow: {
@@ -427,7 +422,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   dateText: {
-    color: '#fff',
     fontSize: 16,
   },
   hidden: {
@@ -443,12 +437,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   infoText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -468,13 +460,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  revealOptionTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
   revealDescription: {
     fontSize: 14,
-    color: '#999',
     marginTop: 8,
   },
   continueButton: {
