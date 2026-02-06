@@ -91,12 +91,18 @@ service cloud.firestore {
 
 ## Storage Security Rules
 
-Copy these rules to Storage > Rules:
+Copy these rules to Storage > Rules in Firebase Console (Storage > Rules). **You must add the `events/covers/` rule** so cover image uploads work:
 
 ```javascript
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Event cover images (uploaded when creating/editing an event)
+    match /events/covers/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.resource.size < 10 * 1024 * 1024;
+    }
+    // Event photo gallery
     match /events/{eventId}/photos/{photoId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.size < 10 * 1024 * 1024;

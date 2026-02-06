@@ -254,7 +254,7 @@ function MainStack() {
       <Stack.Screen
         name="EventGallery"
         component={EventGalleryScreen}
-        options={{ title: 'Event Photos' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Camera"
