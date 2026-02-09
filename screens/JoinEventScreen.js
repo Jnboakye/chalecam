@@ -25,7 +25,13 @@ const JoinEventScreen = ({ navigation }) => {
   const handleBarCodeScanned = async ({ data }) => {
     if (scanned) return;
     setScanned(true);
-    await joinEvent(data);
+    const eventId = (data || '').trim();
+    if (!eventId) {
+      setScanned(false);
+      Alert.alert('Error', 'Invalid QR code. Please scan the event QR code again.');
+      return;
+    }
+    await joinEvent(eventId);
   };
 
   const handleJoinByCode = async () => {
@@ -135,7 +141,14 @@ const JoinEventScreen = ({ navigation }) => {
     } catch (error) {
       setLoading(false);
       setScanned(false);
-      Alert.alert('Error', 'Failed to join event: ' + error.message);
+      const msg = error.message || '';
+      const isPermission = msg.includes('permission') || msg.includes('Permission');
+      Alert.alert(
+        'Error',
+        isPermission
+          ? 'Unable to join this event. If the event exists, ask the owner to update the app\'s Firestore rules (see SETUP.md).'
+          : 'Failed to join event: ' + msg
+      );
     }
   };
 

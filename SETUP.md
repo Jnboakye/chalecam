@@ -78,8 +78,25 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
-      allow update: if request.auth.uid == resource.data.ownerId 
-                    || request.auth.uid in resource.data.participants;
+      allow update: if request.auth != null
+        && (
+          request.auth.uid == resource.data.ownerId
+          || request.auth.uid in resource.data.participants
+          || (
+            request.auth.uid in request.resource.data.participants
+            && !(request.auth.uid in resource.data.participants)
+            && request.resource.data.participants.size() == resource.data.participants.size() + 1
+            && request.resource.data.participants.hasAll(resource.data.participants)
+          )
+          || (
+            'pendingApprovals' in resource.data
+            && 'pendingApprovals' in request.resource.data
+            && request.auth.uid in request.resource.data.pendingApprovals
+            && !(request.auth.uid in resource.data.pendingApprovals)
+            && request.resource.data.pendingApprovals.size() == resource.data.pendingApprovals.size() + 1
+            && request.resource.data.pendingApprovals.hasAll(resource.data.pendingApprovals)
+          )
+        );
     }
     match /photos/{photoId} {
       allow read: if request.auth != null;
